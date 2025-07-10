@@ -41,9 +41,9 @@ git push origin feature/작업브랜치
 
 ```bash
 cd ~/Dev  # 원하는 폴더로 이동
-git clone https://github.com/juanpark/knocksea.git
+git clone https://github.com/LionPay-LikeLion/jobdam.git
 # 또는 SSH 사용 시
-git clone git@github.com:juanpark/knocksea.git
+git clone git@github.com:juanpark/LionPay-LikeLion/jobdam.git
 ```
 
 ---
