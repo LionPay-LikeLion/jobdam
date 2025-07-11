@@ -6,30 +6,48 @@
 브랜치 기반 워크플로우를 통해 안정적인 협업과 코드 관리를 목표로 합니다.
 
 ---
-
+### [Git 브랜치 전략 안내]
 ### 본인 브랜치를 원격 develop과 merge할 때 과정 요약
-#### 1. 본인 develop 브랜치를 원격 develop과 일치시키기
-```bash
-git checkout develop
-git pull origin develop
-```
-#### 2. 본인 작업 브랜치로 이동 
-```bash
-git checkout feature/작업브랜치
-```
-#### 3. 최신 develop 브랜치를 본인 작업 브랜치에 머지하기
-```bash
-git merge develop
-```
-#### 4. 충돌 발생 시 해결 후 커밋
-(예: `git add . && git commit -m "Merge develop into feature/작업브랜치"`)
+🔒 main 브랜치
+- 완전 잠금, 오직 박정환 담당만 merge 가능 (권한 상 팀장님도 가능하지만 가이드라인 상 박정환 담당)
+- 테스트 서버 배포 / 프로덕션 서버 배포 가능한 안정 버전만 존재 (발표 전까지 프로덕션 서버가 테스트 서버)
 
-#### 5. 본인 작업 브랜치를 원격에 푸시
-```bash
-git push origin feature/작업브랜치
-```
-#### 6. GitHub에서 develop 브랜치로 Pull Request 생성
+⚙️ develop 브랜치
+- 공식 개발용 브랜치
+- 실수 방지를 위해서 직접 작업은 금지 
+- 보호 규칙 없이 운영하지만 워크플로우는 지켜야 함
+- 모든 작업은 feature/브랜치에서 진행
+- 본인 브랜치 작업 전에는 항상 develop을 pull한 후 새로운 feature 브랜치 또는 본인 브랜치 최신화 후 작업해주세요.
+- PR 리뷰 후 박정환 담당 또는 팀장님이 develop에 merge
+
+📌 각자 feature 브랜치에서 작업 → PR → develop merge
+
+### 📌 feature 브랜치 작업 흐름:
+1. `git switch develop`
+2. `git pull origin develop`
+3. `git switch -c feature/기능명`
+4. 개발!
+5. 완료 후:
+#### 1. 본인 develop 브랜치를 원격 develop과 일치시키기 
+`git switch develop` → 잠깐 디벨롭 브랜치로 가서
+`git pull origin develop` → 최신 내용 풀 해서
+
+#### 2. 본인 작업 브랜치로 이동 
+`git switch feature/작업브랜치` → 본인 개발하던 브랜치로 가서
+
+#### 3. 최신 develop 브랜치를 본인 작업 브랜치에 머지하기
+`git merge develop` → 충돌 해결 및 테스트 하면서 머지! 빌드까지 해보고 문제 없으면
+
+#### 4. 본인 작업 브랜치를 원격에 푸시
+`git push origin feature/작업브랜치` → 깃허브 본인 브랜치로 푸쉬
+
+#### 5. GitHub에서 develop 브랜치로 Pull Request 생성
 (이미 develop을 머지했기 때문에, 누군가 그 사이 develop에 푸시하지 않았다면 충돌 없이 머지 가능)
+GitHub에서 PR 생성 → 박정환 담당 또는 팀장님이 develop에 merge
+
+🚨 **주의: develop에 PR 생성 시 반드시 로컬에서 실행 확인 후 merge해주세요!**  
+🆘 **build/실행에 문제가 생기면 반드시 공유해주세요. 혼자 끙끙대지 마세요!**  
+
 
 ---
 
