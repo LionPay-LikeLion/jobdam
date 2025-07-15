@@ -1,28 +1,27 @@
+// src/main/java/com/jobdam/payment/entity/Payment.java
 package com.jobdam.payment.entity;
 
-import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
-@Getter @Setter
 @Entity
 @Table(name = "payment")
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class Payment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_id")
     private Integer paymentId;
 
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @Column(nullable = false)
+    @Column(name = "point", nullable = false)
     private Integer point;
 
-    @Column
+    @Column(name = "amount", nullable = false)
     private Integer amount;
 
     @Column(name = "payment_type_code_id", nullable = false)
@@ -31,18 +30,22 @@ public class Payment {
     @Column(name = "payment_status_code_id", nullable = false)
     private Integer paymentStatusCodeId;
 
-    @Column(length = 50, nullable = false)
+    @Column(name = "method", nullable = false, length = 50)
     private String method;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "imp_uid", length = 100, unique = true)
+    @Column(name = "imp_uid", unique = true, length = 100)
     private String impUid;
 
-    @Column(name = "merchant_uid", length = 100, unique = true)
+    @Column(name = "merchant_uid", unique = true, length = 100)
     private String merchantUid;
 
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
     // user 객체
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
