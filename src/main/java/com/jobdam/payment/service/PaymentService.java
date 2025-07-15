@@ -1,4 +1,4 @@
-// PaymentService.java
+// src/main/java/com/jobdam/payment/service/PaymentService.java
 package com.jobdam.payment.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,7 +10,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,70 +19,73 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
 
+    /** [1] 결제 준비 시 PortOne API에 ready 요청 후 DB에 기본 정보 저장 */
     @Transactional
-    public PaymentResponseDto createPayment(PaymentRequestDto requestDto) {
-        String merchantUid = requestDto.getMerchantUid();
-        if (merchantUid == null || merchantUid.isBlank()) {
-            merchantUid = UUID.randomUUID().toString();
-        }
+    public PaymentResponseDto createPayment(PaymentRequestDto dto) {
+        String merchantUid = (dto.getMerchantUid() == null || dto.getMerchantUid().isBlank())
+                ? UUID.randomUUID().toString()
+                : dto.getMerchantUid();
 
-        Payment payment = Payment.builder()
+        // → 실제 PortOne REST 호출 코드는 여기에 추가
+        // 예: portOneClient.ready(...)
+
+        Payment p = Payment.builder()
                 .merchantUid(merchantUid)
-                .amount(requestDto.getAmount())
-                .method(requestDto.getMethod())
-                .userId(requestDto.getUserId())
-                .point(requestDto.getPoint())
-                .paymentTypeCodeId(requestDto.getPaymentTypeCodeId())
-                // paymentStatusCodeId defaults to 1 (SUCCESS)
+                .amount(dto.getAmount())
+                .method(dto.getMethod())
+                .userId(dto.getUserId())
+                .point(dto.getPoint())
+                .paymentTypeCodeId(dto.getPaymentTypeCodeId())
+                .paymentStatusCodeId(1)    // 1: SUCCESS (PortOne ready 응답 기준)
                 .build();
 
-        Payment saved = paymentRepository.save(payment);
-
-        return PaymentResponseDto.builder()
-                .merchantUid(saved.getMerchantUid())
-                .impUid(saved.getImpUid())
-                .amount(saved.getAmount())
-                .method(saved.getMethod())
-                .paymentStatusCodeId(saved.getPaymentStatusCodeId())
-                .createdAt(saved.getCreatedAt())
-                .build();
+        Payment saved = paymentRepository.save(p);
+        return toDto(saved);
     }
 
+    /** [2] 승인 처리 (PortOne approve 콜백) */
     @Transactional
-    public void failPayment(String merchantUid) {
-        Payment payment = paymentRepository.findByMerchantUid(merchantUid)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-        payment.setPaymentStatusCodeId(2); // 2: FAILED
-        paymentRepository.save(payment);
+    public PaymentResponseDto confirmPayment(String impUid, String merchantUid, JsonNode pgResult) {
+        Payment p = paymentRepository.findByMerchantUid(merchantUid)
+                .orElseThrow(() -> new RuntimeException("결제 내역 없음: " + merchantUid));
+        p.setImpUid(impUid);
+        p.setPaymentStatusCodeId(1); // 1: SUCCESS
+        return toDto(paymentRepository.save(p));
     }
 
+    /** [3] 실패 처리 */
     @Transactional
-    public void cancelPayment(String merchantUid) {
-        Payment payment = paymentRepository.findByMerchantUid(merchantUid)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-        payment.setPaymentStatusCodeId(3); // 3: CANCELLED
-        paymentRepository.save(payment);
+    public PaymentResponseDto failPayment(String merchantUid) {
+        return changeStatus(merchantUid, 2);  // 2: FAILED
     }
 
+    /** [4] 취소 처리 */
     @Transactional
-    public void confirmPayment(String impUid, String merchantUid, JsonNode iamportResult) {
-        Payment payment = paymentRepository.findByMerchantUid(merchantUid)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-        payment.setImpUid(impUid);
-        payment.setPaymentStatusCodeId(1); // 1: SUCCESS
-        paymentRepository.save(payment);
+    public PaymentResponseDto cancelPayment(String merchantUid) {
+        return changeStatus(merchantUid, 3);  // 3: CANCELLED
+    }
+
+    private PaymentResponseDto changeStatus(String merchantUid, int statusCode) {
+        Payment p = paymentRepository.findByMerchantUid(merchantUid)
+                .orElseThrow(() -> new RuntimeException("결제 내역 없음: " + merchantUid));
+        p.setPaymentStatusCodeId(statusCode);
+        return toDto(paymentRepository.save(p));
     }
 
     public List<PaymentResponseDto> getPaymentsByUserId(Integer userId) {
         return paymentRepository.findByUserId(userId).stream()
-                .map(p -> PaymentResponseDto.builder()
-                        .merchantUid(p.getMerchantUid())
-                        .impUid(p.getImpUid())
-                        .amount(p.getAmount())
-                        .method(p.getMethod())
-                        .paymentStatusCodeId(p.getPaymentStatusCodeId())
-                        .createdAt(p.getCreatedAt())
-                        .build())
+                .map(this::toDto)
                 .toList();
+    }
+
+    private PaymentResponseDto toDto(Payment p) {
+        return PaymentResponseDto.builder()
+                .merchantUid(p.getMerchantUid())
+                .impUid(p.getImpUid())
+                .amount(p.getAmount())
+                .paymentStatusCodeId(p.getPaymentStatusCodeId())
+                .method(p.getMethod())
+                .createdAt(p.getCreatedAt())
+                .build();
     }
 }
