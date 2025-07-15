@@ -35,4 +35,20 @@ public class CommunityBoard {
 
     @Column(name = "board_status_code_id", nullable = false)
     private Integer boardStatusCodeId;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id", insertable = false, updatable = false)
+    private Community community;
+
 }
