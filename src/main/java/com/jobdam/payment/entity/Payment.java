@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 @Table(name = "payment")
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class Payment {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_id")
     private Integer paymentId;
 
@@ -45,4 +46,8 @@ public class Payment {
     public void prePersist() {
         if (createdAt == null) createdAt = LocalDateTime.now();
     }
+    // user 객체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 }
