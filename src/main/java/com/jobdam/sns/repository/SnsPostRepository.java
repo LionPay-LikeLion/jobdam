@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SnsPostRepository extends JpaRepository<SnsPost, Long> {
+public interface SnsPostRepository extends JpaRepository<SnsPost, Integer> {
 
     List<SnsPost> findByUserId(Integer userId);
     List<SnsPost> findByTitleContaining(String keyword);

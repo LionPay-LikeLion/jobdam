@@ -3,8 +3,9 @@ package com.jobdam.sns.service;
 import com.jobdam.sns.dto.SnsPostRequestDto;
 import com.jobdam.sns.dto.SnsPostResponseDto;
 import com.jobdam.sns.entity.SnsPost;
-import com.jobdam.sns.entity.User;
 import com.jobdam.sns.repository.BookmarkRepository;
+import com.jobdam.sns.repository.LikeRepository;
+import com.jobdam.sns.repository.SnsCommentRepository;
 import com.jobdam.user.repository.UserRepository;
 
 import com.jobdam.sns.repository.SnsPostRepository;
@@ -24,12 +25,14 @@ public class SnsPostServiceImpl implements SnsPostService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final SnsCommentRepository  snsCommentRepository;
 
     @Override
     public List<SnsPostResponseDto> getAllPosts(Integer currentUserId) {
         List<SnsPost> posts = snsPostRepository.findAllByOrderByCreatedAtDesc();
 
         return posts.stream().map(post -> {
+
             SnsPostResponseDto dto = new SnsPostResponseDto();
             dto.setSnsPostId(post.getSnsPostId());
             dto.setUserId(post.getUserId());
@@ -40,10 +43,11 @@ public class SnsPostServiceImpl implements SnsPostService {
             dto.setAttachmentUrl(post.getAttachmentUrl());
             dto.setCreatedAt(post.getCreatedAt());
             dto.setLikeCount(likeRepository.countBySnsPostId(post.getSnsPostId()));
-            dto.setCommentCount(post.getCommentList() != null ? post.getCommentList().size() : 0);
-            dto.setIsLiked(likeRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
-            dto.setIsBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
+            dto.setCommentCount(snsCommentRepository.countBySnsPostId(post.getSnsPostId()));
+            dto.setLiked(likeRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
+            dto.setBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
             return dto;
+
         }).collect(Collectors.toList());
     }
 
@@ -62,9 +66,9 @@ public class SnsPostServiceImpl implements SnsPostService {
         dto.setAttachmentUrl(post.getAttachmentUrl());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setLikeCount(likeRepository.countBySnsPostId(postId));
-        dto.setCommentCount(post.getCommentList() != null ? post.getCommentList().size() : 0);
-        dto.setIsLiked(likeRepository.existsByUserIdAndSnsPostId(currentUserId, postId));
-        dto.setIsBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, postId));
+        dto.setCommentCount(snsCommentRepository.countBySnsPostId(post.getSnsPostId()));
+        dto.setLiked(likeRepository.existsByUserIdAndSnsPostId(currentUserId, postId));
+        dto.setBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, postId));
         return dto;
     }
 
