@@ -1,9 +1,9 @@
 // src/main/java/com/jobdam/payment/entity/Payment.java
 package com.jobdam.payment.entity;
 
+import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
