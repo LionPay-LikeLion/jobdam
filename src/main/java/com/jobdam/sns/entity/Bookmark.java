@@ -25,8 +25,18 @@ public class Bookmark {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     // user 객체
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
+
+    // sns_post 객체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sns_post_id", insertable = false, updatable = false)
+    private SnsPost snsPost;
 }
