@@ -6,24 +6,27 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
-
 @Getter @Setter
 @Entity
-@Table(name = "bookmark",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "post_id"}))
+@Table(name = "bookmark")
 public class Bookmark {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "bookmark_id")
     private Integer bookmarkId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private SnsPost post;
+    @Column(name = "sns_post_id", nullable = false)
+    private Integer snsPostId;
 
-    @Column
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // user 객체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 }

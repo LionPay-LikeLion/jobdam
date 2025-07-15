@@ -1,43 +1,41 @@
 package com.jobdam.admin.entity;
 
-import com.jobdam.code.domain.AdminStatusCode;
-import com.jobdam.code.domain.MemberTypeCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "membertype_change")
 public class MembertypeChange {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "membertype_change_id")
     private Integer membertypeChangeId;
 
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
-    // 현재 회원 유형
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "current_member_id", nullable = false)
-    private MemberTypeCode currentMember;
+    @Column(name = "current_member_type_code_id", nullable = false)
+    private Integer currentMemberTypeCodeId;
 
-    // 요청 회원 유형
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requested_member_id", nullable = false)
-    private MemberTypeCode requestedMember;
+    @Column(name = "requested_member_type_code_id", nullable = false)
+    private Integer requestedMemberTypeCodeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_status_id", nullable = false)
-    private AdminStatusCode requestStatus;
+    @Column(name = "request_admin_status_code_id", nullable = false)
+    private Integer requestAdminStatusCodeId;
 
-    @Column
+    @Column(name = "requested_at")
     private LocalDateTime requestedAt;
 
-    @Column
+    @Column(name = "processed_at")
     private LocalDateTime processedAt;
 }
-

@@ -1,20 +1,23 @@
-package com.jobdam.code.domain;
+package com.jobdam.code.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
-@Table(name = "report_type_code")
-public class ReportTypeCode {
+@Table(name = "board_status_code")
+public class BoardStatusCode {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "board_status_code_id")
+    private Integer boardStatusCodeId;
 
     @Column(length = 20, nullable = false, unique = true)
     private String code;
 
-    @Column(length = 30)
+    @Column(length = 30, nullable = false)
     private String name;
 }

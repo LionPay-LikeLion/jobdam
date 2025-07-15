@@ -5,23 +5,22 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import com.jobdam.code.domain.AiFeedbackTypeCode;
 
 @Getter @Setter
 @Entity
 @Table(name = "ai_feedback")
 public class AiFeedback {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ai_feedback_id")
     private Integer aiFeedbackId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id", nullable = false)
-    private AiFeedbackTypeCode type;
+    @Column(name = "ai_feedback_type_code_id", nullable = false)
+    private Integer aiFeedbackTypeCodeId;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String inputText;
@@ -29,6 +28,11 @@ public class AiFeedback {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String outputText;
 
-    @Column(nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // user 객체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 }

@@ -5,31 +5,34 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import com.jobdam.code.domain.ReportTypeCode;
 
 @Getter @Setter
 @Entity
 @Table(name = "report")
 public class Report {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "report_id")
     private Integer reportId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id", nullable = false)
-    private ReportTypeCode type;
+    @Column(name = "report_type_code_id", nullable = false)
+    private Integer reportTypeCodeId;
 
-    @Column(nullable = false)
-    private Long targetId; // BIGINT
+    @Column(name = "target_id", nullable = false)
+    private Long targetId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id", nullable = false)
-    private User reporter;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String reason;
 
-    @Column
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
-}
 
+    // 신고자 User 객체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+}

@@ -1,17 +1,18 @@
 package com.jobdam.community.entity;
 
-
-import com.jobdam.code.domain.SubscriptionLevelCode;
-import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import com.jobdam.user.entity.User;
 
 @Getter @Setter
 @Entity
 @Table(name = "community")
 public class Community {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "community_id")
     private Integer communityId;
 
     @Column(length = 100, nullable = false)
@@ -20,20 +21,22 @@ public class Community {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_level_id", nullable = false)
-    private SubscriptionLevelCode subscriptionLevel;
+    @Column(name = "subscription_level_code_id", nullable = false)
+    private Integer subscriptionLevelCodeId;
+
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", nullable = false)
-    private User creator;
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 
-    @Column
+    @Column(name = "enter_point")
     private Integer enterPoint;
 
-    @Column
+    @Column(name = "max_member")
     private Integer maxMember;
 
-    @Column
+    @Column(name = "current_member")
     private Integer currentMember;
 }

@@ -10,13 +10,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "sns_post")
 public class SnsPost {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sns_post_id")
     private Integer snsPostId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @Column(length = 100, nullable = false)
     private String title;
@@ -24,12 +25,17 @@ public class SnsPost {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(length = 255)
+    @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    @Column(length = 255)
+    @Column(name = "attachment_url", length = 255)
     private String attachmentUrl;
 
-    @Column(nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // user 객체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 }

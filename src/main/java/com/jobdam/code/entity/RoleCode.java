@@ -1,16 +1,19 @@
-package com.jobdam.code.domain;
+package com.jobdam.code.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @Entity
-@Table(name = "ai_feedback_type_code")
-public class AiFeedbackTypeCode {
+@Table(name = "role_code")
+public class RoleCode {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "role_code_id")
+    private Integer roleCodeId;
 
     @Column(length = 20, nullable = false, unique = true)
     private String code;

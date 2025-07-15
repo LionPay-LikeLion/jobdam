@@ -1,6 +1,5 @@
 package com.jobdam.community.entity;
 
-import com.jobdam.code.domain.CommunityMemberRoleCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,26 +10,29 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "community_member")
 public class CommunityMember {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "community_member_id")
     private Integer communityMemberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "community_id", nullable = false)
-    private Community community;
+    @Column(name = "community_id", nullable = false)
+    private Integer communityId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private CommunityMemberRoleCode role;
+    @Column(name = "community_member_role_code_id", nullable = false)
+    private Integer communityMemberRoleCodeId;
 
-    @Column
+    @Column(name = "paid_point")
     private Integer paidPoint;
 
-    @Column
+    @Column(name = "joined_at")
     private LocalDateTime joinedAt;
-}
 
+    // user만 객체로!
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+}

@@ -1,41 +1,41 @@
 package com.jobdam.user.entity;
 
-import com.jobdam.code.domain.MemberTypeCode;
-import com.jobdam.code.domain.RoleCode;
-import com.jobdam.code.domain.SubscriptionLevelCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
-
-@Getter @Setter
+@Getter
+@Setter
 @Entity
 @Table(name = "user")
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Integer userId;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255, nullable = false)
     private String password;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50, nullable = false)
     private String nickname;
 
-    // Lookup 테이블 연관관계
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_level_id", nullable = false)
-    private SubscriptionLevelCode subscriptionLevel;
+    @Column(name = "subscription_level_code_id", nullable = false)
+    private Integer subscriptionLevelCodeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private RoleCode role;
+    @Column(name = "role_code_id", nullable = false)
+    private Integer roleCodeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_type_id", nullable = false)
-    private MemberTypeCode memberType;
+    @Column(name = "member_type_code_id", nullable = false)
+    private Integer memberTypeCodeId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @Column
     private Integer point;
@@ -43,10 +43,6 @@ public class User {
     @Column(length = 20)
     private String phone;
 
-    @Column(length = 255)
+    @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
-
-    @Column
-    private java.sql.Timestamp createdAt;
 }
-
