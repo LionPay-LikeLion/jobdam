@@ -3,6 +3,9 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
   config:
     import: optional:file:.env[.properties]
   datasource:
@@ -12,7 +15,7 @@ spring:
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
   jpa:
     hibernate:
-      ddl-auto: update  # in development (auto table create/modify)
+      ddl-auto: none  # in development (auto table create/modify)
       # ddl-auto: none  # in operation (manual sql management)
     show-sql: true
 

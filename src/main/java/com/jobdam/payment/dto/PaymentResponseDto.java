@@ -1,5 +1,6 @@
 package com.jobdam.payment.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,8 +15,10 @@ public class PaymentResponseDto {
     private String merchantUid;
     private String impUid;
     private Integer amount;
-    private String status;
+    private int paymentStatusCodeId;
     private String method;
-    private LocalDateTime paidAt;
-    private String failReason;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
+//    private String failReason;
+
 }

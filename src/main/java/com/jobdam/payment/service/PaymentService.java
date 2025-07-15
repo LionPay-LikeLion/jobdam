@@ -1,5 +1,5 @@
+// PaymentService.java
 package com.jobdam.payment.service;
-
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jobdam.payment.dto.PaymentRequestDto;
@@ -22,61 +22,68 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto requestDto) {
-        //임의로 merchant_uid 생성(또는 프론트에서 받아온 값 사용 가능, 추후 프론트 수정하며 수정 예정)
         String merchantUid = requestDto.getMerchantUid();
-        if(merchantUid == null||merchantUid.isBlank()) {
+        if (merchantUid == null || merchantUid.isBlank()) {
             merchantUid = UUID.randomUUID().toString();
         }
-
 
         Payment payment = Payment.builder()
                 .merchantUid(merchantUid)
                 .amount(requestDto.getAmount())
                 .method(requestDto.getMethod())
-                .status("READY") // 초기 상태
-                .createdAt(LocalDateTime.now())
+                .userId(requestDto.getUserId())
+                .point(requestDto.getPoint())
+                .paymentTypeCodeId(requestDto.getPaymentTypeCodeId())
+                // paymentStatusCodeId defaults to 1 (SUCCESS)
                 .build();
 
         Payment saved = paymentRepository.save(payment);
 
         return PaymentResponseDto.builder()
                 .merchantUid(saved.getMerchantUid())
+                .impUid(saved.getImpUid())
                 .amount(saved.getAmount())
                 .method(saved.getMethod())
-                .status(saved.getStatus())
+                .paymentStatusCodeId(saved.getPaymentStatusCodeId())
+                .createdAt(saved.getCreatedAt())
                 .build();
     }
 
-
-
-    //imp_uid 받아서 실제 결과 저장(webhook 또는 콜백에서 사용)
     @Transactional
-    public void confirmPayment(String impUid, String merchantUid, JsonNode iamportResult)
-    {
-        Payment payment =  paymentRepository.findByMerchantUid(merchantUid)
-                .orElseThrow(()-> new RuntimeException("결제 내역 없음"));
-
-        payment.setImpUid(impUid);
-        payment.setStatus("PAID");
-        payment.setPaidAt(LocalDateTime.now());
-
+    public void failPayment(String merchantUid) {
+        Payment payment = paymentRepository.findByMerchantUid(merchantUid)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setPaymentStatusCodeId(2); // 2: FAILED
         paymentRepository.save(payment);
+    }
 
+    @Transactional
+    public void cancelPayment(String merchantUid) {
+        Payment payment = paymentRepository.findByMerchantUid(merchantUid)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setPaymentStatusCodeId(3); // 3: CANCELLED
+        paymentRepository.save(payment);
+    }
+
+    @Transactional
+    public void confirmPayment(String impUid, String merchantUid, JsonNode iamportResult) {
+        Payment payment = paymentRepository.findByMerchantUid(merchantUid)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        payment.setImpUid(impUid);
+        payment.setPaymentStatusCodeId(1); // 1: SUCCESS
+        paymentRepository.save(payment);
     }
 
     public List<PaymentResponseDto> getPaymentsByUserId(Integer userId) {
-        List<Payment> payments = paymentRepository.findByUserId(userId);
-        return payments.stream()
+        return paymentRepository.findByUserId(userId).stream()
                 .map(p -> PaymentResponseDto.builder()
                         .merchantUid(p.getMerchantUid())
                         .impUid(p.getImpUid())
                         .amount(p.getAmount())
                         .method(p.getMethod())
-                        .status(p.getStatus())
-                        .paidAt(p.getPaidAt())
-                        .failReason(p.getFailReason())
+                        .paymentStatusCodeId(p.getPaymentStatusCodeId())
+                        .createdAt(p.getCreatedAt())
                         .build())
                 .toList();
     }
-
 }
