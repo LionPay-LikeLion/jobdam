@@ -24,7 +24,7 @@ public class PaymentController {
         return ResponseEntity.ok(svc.createPayment(dto));
     }
 
-    // PortOne “결제 승인(approve)” 콜백 처리
+    // PortOne “결제 승인(approve)” 콜백 처리w
     @PostMapping("/confirm")
     public ResponseEntity<PaymentResponseDto> confirm(
             @RequestParam String imp_uid,
