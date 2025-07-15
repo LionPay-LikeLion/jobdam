@@ -7,7 +7,6 @@ import com.jobdam.user.entity.User;
 
 public class SnsPostMapper {
 
-    // 요청 DTO → 엔티티
     public static SnsPost toEntity(SnsPostRequestDto dto, Integer userId) {
         SnsPost post = new SnsPost();
         post.setUserId(userId);
@@ -18,7 +17,7 @@ public class SnsPostMapper {
         return post;
     }
 
-    // 엔티티 → 응답 DTO
+
     public static SnsPostResponseDto toDto(SnsPost post, User user, int likeCount, int commentCount, boolean isLiked, boolean isBookmarked) {
         SnsPostResponseDto dto = new SnsPostResponseDto();
         dto.setSnsPostId(post.getSnsPostId());

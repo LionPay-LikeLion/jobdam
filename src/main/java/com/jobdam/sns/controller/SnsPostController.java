@@ -21,19 +21,16 @@ public class SnsPostController {
         return snsPostService.getAllPosts(userId);
     }
 
-    // 단일 게시글 조회
     @GetMapping("/{postId}")
     public SnsPostResponseDto getPost(@PathVariable Integer postId, @RequestParam Integer userId) {
         return snsPostService.getPostById(postId, userId);
     }
 
-    // 게시글 작성
     @PostMapping
     public Integer createPost(@RequestBody SnsPostRequestDto requestDto, @RequestParam Integer userId) {
         return snsPostService.createPost(requestDto, userId);
     }
 
-    // 게시글 수정
     @PutMapping("/{postId}")
     public void updatePost(@PathVariable Integer postId,
                            @RequestBody SnsPostRequestDto requestDto,
@@ -41,7 +38,6 @@ public class SnsPostController {
         snsPostService.updatePost(postId, requestDto, userId);
     }
 
-    // 게시글 삭제
     @DeleteMapping("/{postId}")
     public void deletePost(@PathVariable Integer postId, @RequestParam Integer userId) {
         snsPostService.deletePost(postId, userId);

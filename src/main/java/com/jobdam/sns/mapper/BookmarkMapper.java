@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 public class BookmarkMapper {
 
-    // 요청 DTO → 엔티티 변환
     public static Bookmark toEntity(BookmarkRequestDto dto, Integer userId) {
         Bookmark bookmark = new Bookmark();
         bookmark.setSnsPostId(dto.getSnsPostId());
@@ -19,14 +18,12 @@ public class BookmarkMapper {
         return bookmark;
     }
 
-    // 엔티티 → 응답 DTO 변환
     public static BookmarkResponseDto toDto(Bookmark bookmark, SnsPost post, User author) {
         BookmarkResponseDto dto = new BookmarkResponseDto();
         dto.setBookmarkId(bookmark.getBookmarkId());
         dto.setSnsPostId(bookmark.getSnsPostId());
         dto.setBookmarkedAt(bookmark.getCreatedAt());
 
-        // 게시글 정보
         if (post != null) {
             dto.setTitle(post.getTitle());
             dto.setThumbnailImageUrl(post.getImageUrl());

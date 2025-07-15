@@ -9,17 +9,16 @@ import java.time.LocalDateTime;
 
 public class SnsCommentMapper {
 
-    // 요청 DTO → 엔티티
     public static SnsComment toEntity(SnsCommentRequestDto dto, Integer userId) {
         SnsComment comment = new SnsComment();
         comment.setSnsPostId(dto.getSnsPostId());
         comment.setUserId(userId);
         comment.setContent(dto.getContent());
-        comment.setCreatedAt(LocalDateTime.now()); // 작성 시간 수동 설정
+        comment.setCreatedAt(LocalDateTime.now());
         return comment;
     }
 
-    // 엔티티 → 응답 DTO
+
     public static SnsCommentResponseDto toDto(SnsComment entity, User user) {
         SnsCommentResponseDto dto = new SnsCommentResponseDto();
         dto.setSnsCommentId(entity.getSnsCommentId());

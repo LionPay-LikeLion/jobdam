@@ -99,8 +99,6 @@ public class SnsPostServiceImpl implements SnsPostService {
         post.setContent(requestDto.getContent());
         post.setImageUrl(requestDto.getImageUrl());
         post.setAttachmentUrl(requestDto.getAttachmentUrl());
-
-        // JPA dirty checking으로 자동 업데이트
     }
 
     @Override
