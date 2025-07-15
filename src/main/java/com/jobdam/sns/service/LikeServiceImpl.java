@@ -4,7 +4,7 @@ import com.jobdam.sns.entity.Like;
 import com.jobdam.sns.repository.LikeRepository;
 import com.jobdam.user.repository.UserRepository;
 import com.jobdam.sns.repository.SnsPostRepository;
-import com.jobdam.sns.entity.User;
+import com.jobdam.user.entity.User;
 import com.jobdam.sns.entity.SnsPost;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

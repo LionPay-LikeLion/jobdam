@@ -3,7 +3,7 @@ package com.jobdam.sns.service;
 import com.jobdam.sns.dto.SnsCommentRequestDto;
 import com.jobdam.sns.dto.SnsCommentResponseDto;
 import com.jobdam.sns.entity.SnsComment;
-import com.jobdam.sns.entity.User;
+import com.jobdam.user.entity.User;
 import com.jobdam.sns.entity.SnsPost;
 import com.jobdam.sns.repository.SnsCommentRepository;
 import com.jobdam.sns.repository.SnsPostRepository;

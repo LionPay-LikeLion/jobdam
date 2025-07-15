@@ -3,7 +3,7 @@ package com.jobdam.sns.service;
 import com.jobdam.sns.dto.BookmarkResponseDto;
 import com.jobdam.sns.entity.Bookmark;
 import com.jobdam.sns.entity.SnsPost;
-import com.jobdam.sns.entity.User;
+import com.jobdam.user.entity.User;
 import com.jobdam.sns.repository.BookmarkRepository;
 import com.jobdam.sns.repository.SnsPostRepository;
 import com.jobdam.user.repository.UserRepository;
@@ -49,6 +49,7 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     public List<BookmarkResponseDto> getBookmarksByUser(Integer userId) {
+
         List<Bookmark> bookmarks = bookmarkRepository.findByUserId(userId);
 
         return bookmarks.stream().map(bookmark -> {
