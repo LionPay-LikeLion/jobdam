@@ -7,6 +7,6 @@ public class CommunityBoardCreateRequestDto {
 
     private String name;
     private String description;
-    private Integer boardTypeCodeId;
+    private String boardTypeCode;
 
 }

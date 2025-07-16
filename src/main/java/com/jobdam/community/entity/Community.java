@@ -1,12 +1,14 @@
 package com.jobdam.community.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import com.jobdam.user.entity.User;
 
 @Getter @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "community")
 public class Community {
 
