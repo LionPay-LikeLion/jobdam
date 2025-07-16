@@ -1,4 +1,3 @@
-// src/main/java/com/jobdam/payment/dto/PaymentRequestDto.java
 package com.jobdam.payment.dto;
 
 import lombok.*;

@@ -1,9 +1,7 @@
-// src/main/java/com/jobdam/payment/dto/PaymentResponseDto.java
 package com.jobdam.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

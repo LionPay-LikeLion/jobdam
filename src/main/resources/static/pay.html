@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PortOne 결제 테스트</title>
+    <!-- 1) 최신 SDK(v1) 한 번만 로드 -->
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script> <!-- :contentReference[oaicite:8]{index=8} -->
+</head>
+<body>
+<button id="pay-btn">결제하기</button>
+
+<script>
+    // 2) SDK 초기화: 가맹점 식별코드 설정 (imp00000000… 형태)
+    IMP.init("imp00213017");                  // :contentReference[oaicite:9]{index=9}
+
+    document.getElementById("pay-btn").addEventListener("click", () => {
+        // 3) 결제 요청: channelKey + pg 명시
+        IMP.request_pay({
+            channelKey: "channel-key-0c91845c-a55e-43b2-81ee-660188a09eed",  // :contentReference[oaicite:10]{index=10}
+            pg:          "html5_inicis.INIpayTest",                        // :contentReference[oaicite:11]{index=11}
+            pay_method:  "card",
+            merchant_uid:`order_${new Date().getTime()}`,
+            name:        "테스트 상품",
+            amount:      100,
+            buyer_email: "alice@example.com",
+            buyer_name:  "Alice",
+            buyer_tel:   "010-1234-5678"
+        }, function(response) {
+            if (response.success) {
+                // 4) 승인 콜백: 기존 백엔드 confirm 엔드포인트 호출
+                fetch(`/api/payments/confirm?imp_uid=${response.imp_uid}&merchant_uid=${response.merchant_uid}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(response)
+                })
+                    .then(res => res.json())
+                    .then(data => console.log("결제 확인:", data));
+            } else {
+                console.error("결제 실패:", response.error_msg);
+            }
+        });
+    });
+</script>
+</body>
+</html>
