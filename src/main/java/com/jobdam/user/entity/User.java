@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import com.jobdam.code.entity.MemberTypeCode;
 
 @Getter
 @Setter
@@ -45,4 +46,19 @@ public class User {
 
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
+
+    /*@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_type_code_id", insertable = false, updatable = false)
+    private MemberTypeCode memberTypeCode;
+*/
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "member_type_code_id",
+            referencedColumnName = "member_type_code_id",  // ★ 이거 꼭 명시 ★
+            insertable = false,
+            updatable = false
+    )
+    private MemberTypeCode memberTypeCode;
+
 }
