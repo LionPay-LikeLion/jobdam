@@ -1,5 +1,7 @@
 package com.jobdam.community.entity;
 
+import com.jobdam.code.entity.BoardStatusCode;
+import com.jobdam.code.entity.BoardTypeCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,5 +43,22 @@ public class CommunityComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_status_code_id", insertable = false, updatable = false)
+    private BoardStatusCode boardStatusCode;
+
 }
 
