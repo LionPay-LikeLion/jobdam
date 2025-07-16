@@ -33,16 +33,20 @@ public class CommunityBoardService {
                 .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
 
 
-        BoardTypeCode boardTypeCode = boardTypeCodeRepository.findById(dto.getBoardTypeCodeId())
+        BoardTypeCode boardTypeCode = boardTypeCodeRepository.findByCode(dto.getBoardTypeCode())
                 .orElseThrow(() -> new RuntimeException("게시판 타입을 찾을 수 없습니다."));
 
 
-        CommunityBoard board = new CommunityBoard();
-        board.setName(dto.getName());
-        board.setDescription(dto.getDescription());
-        board.setCommunityId(communityId);
-        board.setBoardTypeCodeId(dto.getBoardTypeCodeId()); // id로 저장
-        board.setBoardStatusCodeId(1); // (기본값)
+        CommunityBoard board = CommunityBoard.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .communityId(communityId)
+                .boardTypeCode(boardTypeCode)
+                .boardStatusCodeId(1)
+                .build();
+
+        communityBoardRepository.save(board);
+
 
         communityBoardRepository.save(board);
 

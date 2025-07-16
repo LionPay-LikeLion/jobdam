@@ -1,13 +1,17 @@
 package com.jobdam.community.entity;
 
+import com.jobdam.code.entity.PostTypeCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "community_post")
 public class CommunityPost {
 
@@ -46,4 +50,21 @@ public class CommunityPost {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_type_code_id", insertable = false, updatable = false)
+    private PostTypeCode postTypeCode;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+
 }

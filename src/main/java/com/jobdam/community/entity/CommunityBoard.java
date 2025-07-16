@@ -1,12 +1,16 @@
 package com.jobdam.community.entity;
 
+import com.jobdam.code.entity.BoardTypeCode;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Getter @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "community_board")
 public class CommunityBoard {
 
@@ -50,5 +54,11 @@ public class CommunityBoard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_id", insertable = false, updatable = false)
     private Community community;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_type_code_id", insertable = false, updatable = false)
+    private BoardTypeCode boardTypeCode;
+
+
 
 }
