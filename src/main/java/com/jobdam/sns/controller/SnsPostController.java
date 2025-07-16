@@ -2,6 +2,8 @@ package com.jobdam.sns.controller;
 
 import com.jobdam.sns.dto.SnsPostRequestDto;
 import com.jobdam.sns.dto.SnsPostResponseDto;
+import com.jobdam.sns.dto.SnsPostDetailResponseDto;
+
 import com.jobdam.sns.service.SnsPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,14 @@ public class SnsPostController {
     public SnsPostResponseDto getPost(@PathVariable Integer postId, @RequestParam Integer userId) {
         return snsPostService.getPostById(postId, userId);
     }
+
+    @GetMapping("/{postId}/detail")
+    public SnsPostDetailResponseDto getPostDetail(@PathVariable Integer postId,
+                                                  @RequestParam Integer userId) {
+        return snsPostService.getPostDetail(postId, userId);
+    }
+
+
 
     @PostMapping
     public Integer createPost(@RequestBody SnsPostRequestDto requestDto, @RequestParam Integer userId) {
