@@ -33,7 +33,6 @@ public class SnsPostServiceImpl implements SnsPostService {
     @Override
     @Transactional(readOnly = true)
     public List<SnsPostResponseDto> getAllPosts(Integer currentUserId) {
-        //List<SnsPost> posts = snsPostRepository.findAllByOrderByCreatedAtDesc();
         List<SnsPost> posts = snsPostRepository.findAllWithUserAndMemberTypeCode();
 
         return posts.stream().map(post -> {
@@ -51,9 +50,6 @@ public class SnsPostServiceImpl implements SnsPostService {
             dto.setCommentCount(snsCommentRepository.countBySnsPostId(post.getSnsPostId()));
             dto.setLiked(likeRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
             dto.setBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
-            //MemberTypeCode typeCode = post.getUser().getMemberTypeCode();
-            //dto.setMemberTypeCode(typeCode != null ? typeCode.getCode() : null);
-
             dto.setMemberTypeCode(
                     post.getUser().getMemberTypeCode() != null
                             ? post.getUser().getMemberTypeCode().getCode()
@@ -66,9 +62,36 @@ public class SnsPostServiceImpl implements SnsPostService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<SnsPostResponseDto> getMyPosts(Integer currentUserId) {
+        List<SnsPost> posts = snsPostRepository.findAllByUserIdWithUserAndMemberTypeCode(currentUserId);
+
+        return posts.stream().map(post -> {
+            SnsPostResponseDto dto = new SnsPostResponseDto();
+            dto.setSnsPostId(post.getSnsPostId());
+            dto.setUserId(post.getUserId());
+            dto.setNickname(post.getUser().getNickname());
+            dto.setTitle(post.getTitle());
+            dto.setContent(post.getContent());
+            dto.setImageUrl(post.getImageUrl());
+            dto.setAttachmentUrl(post.getAttachmentUrl());
+            dto.setCreatedAt(post.getCreatedAt());
+            dto.setLikeCount(likeRepository.countBySnsPostId(post.getSnsPostId()));
+            dto.setCommentCount(snsCommentRepository.countBySnsPostId(post.getSnsPostId()));
+            dto.setLiked(likeRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
+            dto.setBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()));
+            dto.setMemberTypeCode(
+                    post.getUser().getMemberTypeCode() != null
+                            ? post.getUser().getMemberTypeCode().getCode()
+                            : null
+            );
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
     public SnsPostResponseDto getPostById(Integer postId, Integer currentUserId) {
-       // SnsPost post = snsPostRepository.findById(postId)
-               // .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
         SnsPost post = snsPostRepository.findByIdWithUserAndMemberTypeCode(postId)
                 .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
 
@@ -90,8 +113,6 @@ public class SnsPostServiceImpl implements SnsPostService {
 
     @Override
     public SnsPostDetailResponseDto getPostDetail(Integer postId, Integer userId) {
-       // SnsPost post = snsPostRepository.findById(postId)
-               // .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
         SnsPost post = snsPostRepository.findByIdWithUserAndMemberTypeCode(postId)
                 .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
 

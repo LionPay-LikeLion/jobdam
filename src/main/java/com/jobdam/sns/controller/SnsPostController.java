@@ -28,6 +28,13 @@ public class SnsPostController {
         return snsPostService.getPostById(postId, userId);
     }
 
+    // 내 피드(내가 쓴 게시글) 조회
+    @GetMapping("/my")
+    public List<SnsPostResponseDto> getMyPosts(@RequestParam Integer userId) {
+        return snsPostService.getMyPosts(userId);
+    }
+
+
     @GetMapping("/{postId}/detail")
     public SnsPostDetailResponseDto getPostDetail(@PathVariable Integer postId,
                                                   @RequestParam Integer userId) {

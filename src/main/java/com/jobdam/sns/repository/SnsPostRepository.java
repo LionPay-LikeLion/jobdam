@@ -20,4 +20,8 @@ public interface SnsPostRepository extends JpaRepository<SnsPost, Integer> {
     @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode WHERE p.snsPostId = :postId")
     Optional<SnsPost> findByIdWithUserAndMemberTypeCode(@Param("postId") Integer postId);
 
+    // 내 피드만 보기
+    @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode WHERE u.userId = :userId ORDER BY p.createdAt DESC")
+    List<SnsPost> findAllByUserIdWithUserAndMemberTypeCode(@Param("userId") Integer userId);
+
 }
