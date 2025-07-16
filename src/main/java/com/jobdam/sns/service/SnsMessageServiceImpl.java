@@ -31,10 +31,10 @@ public class SnsMessageServiceImpl implements SnsMessageService {
     @Override
     public List<SnsMessageResponseDto> getConversation(Long userId1, Long userId2) {
         return snsMessageRepository
-                .findBySenderIdAndReceiverIdOrReceiverIdAndSenderIdOrderByCreatedAt(
-                        userId1, userId2, userId1, userId2)
+                .findMessagesWithSenderFetched(userId1, userId2, userId2, userId1)
                 .stream()
                 .map(SnsMessageMapper::toDto)
                 .collect(Collectors.toList());
     }
+
 }
