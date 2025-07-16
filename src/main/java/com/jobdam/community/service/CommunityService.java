@@ -4,6 +4,8 @@ import com.jobdam.code.entity.SubscriptionLevelCode;
 import com.jobdam.community.dto.CommunityCreateRequestDto;
 import com.jobdam.community.dto.CommunityListResponseDto;
 import com.jobdam.community.entity.Community;
+import com.jobdam.community.entity.CommunityMember;
+import com.jobdam.community.repository.CommunityMemberRepository;
 import com.jobdam.community.repository.CommunityRepository;
 import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,8 +25,9 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final UserRepository userRepository;
     private final SubscriptionLevelCodeRepository subscriptionLevelCodeRepository;
+    private final CommunityMemberRepository communityMemberRepository;
 
-    // 커뮤니티 생성
+
     @Transactional
     public Integer createCommunity(CommunityCreateRequestDto dto) {
 
@@ -46,6 +50,16 @@ public class CommunityService {
 
 
         communityRepository.save(community);
+
+        CommunityMember member = CommunityMember.builder()
+                .communityId(community.getCommunityId())
+                .userId(dto.getUserId())
+                .joinedAt(LocalDateTime.now())
+                .paidPoint(0) // 만든 사람은 입장 포인트 없음
+                .communityMemberRoleCodeId(1) // 1번이 관리자라면
+                .build();
+
+        communityMemberRepository.save(member);
 
         return community.getCommunityId();
     }
