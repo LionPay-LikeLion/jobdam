@@ -7,9 +7,9 @@ import com.jobdam.sns.repository.BookmarkRepository;
 import com.jobdam.sns.repository.LikeRepository;
 import com.jobdam.sns.repository.SnsCommentRepository;
 import com.jobdam.user.repository.UserRepository;
+import com.jobdam.sns.dto.SnsPostDetailResponseDto;
 
 import com.jobdam.sns.repository.SnsPostRepository;
-import com.jobdam.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -71,6 +71,33 @@ public class SnsPostServiceImpl implements SnsPostService {
         dto.setBookmarked(bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, postId));
         return dto;
     }
+
+    @Override
+    public SnsPostDetailResponseDto getPostDetail(Integer postId, Integer userId) {
+        SnsPost post = snsPostRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
+
+        int likeCount = likeRepository.countBySnsPostId(postId);
+        int commentCount = snsCommentRepository.countBySnsPostId(postId);
+        boolean liked = likeRepository.existsByUserIdAndSnsPostId(userId, postId);
+        boolean bookmarked = bookmarkRepository.existsByUserIdAndSnsPostId(userId, postId);
+
+        return SnsPostDetailResponseDto.builder()
+                .snsPostId(post.getSnsPostId())
+                .userId(post.getUserId())
+                .nickname(post.getUser().getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .imageUrl(post.getImageUrl())
+                .attachmentUrl(post.getAttachmentUrl())
+                .createdAt(post.getCreatedAt())
+                .likeCount(likeCount)
+                .commentCount(commentCount)
+                .liked(liked)
+                .bookmarked(bookmarked)
+                .build();
+    }
+
 
     @Override
     @Transactional
