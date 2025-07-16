@@ -6,6 +6,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import com.jobdam.user.entity.User;
 
+
 @Getter @Setter
 @Entity
 @Table(name = "sns_comment")

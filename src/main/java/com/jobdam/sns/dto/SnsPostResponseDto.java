@@ -20,6 +20,8 @@ public class SnsPostResponseDto {
     private LocalDateTime createdAt;
     private int likeCount;
     private int commentCount;
+    private String memberTypeCode;
+
 
     private boolean isLiked;
     private boolean isBookmarked;

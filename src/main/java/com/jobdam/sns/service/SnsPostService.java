@@ -16,4 +16,7 @@ public interface SnsPostService {
 
     void updatePost(Integer postId, SnsPostRequestDto requestDto, Integer userId);
     void deletePost(Integer postId, Integer userId);
+
+    List<SnsPostResponseDto> getMyPosts(Integer currentUserId);
+
 }
