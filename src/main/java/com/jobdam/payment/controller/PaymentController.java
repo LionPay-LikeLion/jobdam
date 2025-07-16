@@ -1,47 +1,41 @@
 package com.jobdam.payment.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.jobdam.payment.dto.PaymentRequestDto;
 import com.jobdam.payment.dto.PaymentResponseDto;
 import com.jobdam.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/payment")
 @RequiredArgsConstructor
 public class PaymentController {
-    private final PaymentService svc;
+
+    private final PaymentService paymentService;
 
     @PostMapping("/create")
-    public ResponseEntity<PaymentResponseDto> create(@RequestBody PaymentRequestDto dto) {
-        return ResponseEntity.ok(svc.createPayment(dto));
+    public PaymentResponseDto createPayment(@RequestBody PaymentRequestDto dto) {
+        return paymentService.createPayment(dto);
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<PaymentResponseDto> confirm(
-            @RequestParam String imp_uid,
-            @RequestParam String merchant_uid,
-            @RequestBody JsonNode pgResult
+    public PaymentResponseDto confirmPayment(
+            @RequestParam String merchantUid,
+            @RequestParam String impUid,
+            @RequestParam Integer amount
     ) {
-        return ResponseEntity.ok(svc.confirmPayment(imp_uid, merchant_uid, pgResult));
-    }
-
-    @PostMapping("/fail")
-    public ResponseEntity<PaymentResponseDto> fail(@RequestParam String merchant_uid) {
-        return ResponseEntity.ok(svc.failPayment(merchant_uid));
+        return paymentService.confirmPayment(merchantUid, impUid, amount);
     }
 
     @PostMapping("/cancel")
-    public ResponseEntity<PaymentResponseDto> cancel(@RequestParam String merchant_uid) {
-        return ResponseEntity.ok(svc.cancelPayment(merchant_uid));
+    public PaymentResponseDto cancelPayment(@RequestParam String merchantUid) {
+        return paymentService.cancelPayment(merchantUid);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PaymentResponseDto>> list(@PathVariable Integer userId) {
-        return ResponseEntity.ok(svc.getPaymentsByUserId(userId));
+    public List<PaymentResponseDto> getPaymentsByUser(@PathVariable Integer userId) {
+        return paymentService.getPaymentsByUserId(userId);
     }
 }

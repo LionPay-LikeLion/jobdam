@@ -6,8 +6,9 @@ import lombok.*;
 public class PaymentRequestDto {
     private Integer userId;
     private Integer point;
-    private Integer paymentTypeCodeId;
-    private String merchantUid;
     private Integer amount;
+    private Integer paymentTypeCodeId;
+    private Integer paymentStatusCodeId;
+    private String merchantUid;
     private String method;
 }

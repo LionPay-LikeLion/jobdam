@@ -2,44 +2,80 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>PortOne 결제 테스트</title>
-    <!-- 1) 최신 SDK(v1) 한 번만 로드 -->
-    <script src="https://cdn.iamport.kr/v1/iamport.js"></script> <!-- :contentReference[oaicite:8]{index=8} -->
+    <title>PortOne 결제 연동 테스트</title>
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        input, button { margin: 0.2rem; padding: 0.4rem; }
+        pre { background: #f3f3f3; padding: 1rem; }
+    </style>
 </head>
 <body>
-<button id="pay-btn">결제하기</button>
+<h2>포트원(아임포트) 결제 연동 테스트</h2>
+
+<form id="payForm">
+    <input name="userId" placeholder="유저ID" value="5"/><br>
+    <input name="point" placeholder="포인트" value="100000000"/><br>
+    <input name="amount" placeholder="결제금액" value="100"/><br>
+    <input name="method" placeholder="결제수단(card, kakao, toss 등)" value="card"/><br>
+    <button type="submit">결제하기</button>
+</form>
+
+<pre id="payResult"></pre>
 
 <script>
-    // 2) SDK 초기화: 가맹점 식별코드 설정 (imp00000000… 형태)
-    IMP.init("imp00213017");                  // :contentReference[oaicite:9]{index=9}
+    // IMP 변수는 iamport.js 로드 시 자동 등록됨, 중복 선언 불필요
+    IMP.init("imp00213017"); // ← 네 가맹점 코드로 설정!
 
-    document.getElementById("pay-btn").addEventListener("click", () => {
-        // 3) 결제 요청: channelKey + pg 명시
+    document.getElementById('payForm').onsubmit = async function(e) {
+        e.preventDefault();
+
+        const data = Object.fromEntries(new FormData(e.target).entries());
+
+        // 1. 백엔드에 먼저 결제정보 생성(merchant_uid 발급)
+        const resp = await fetch('/payment/create', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                userId: data.userId,
+                point: data.point,
+                amount: data.amount,
+                paymentTypeCodeId: 1,
+                paymentStatusCodeId: 2,
+                merchantUid: "mid_" + Date.now(), // 유니크 값 생성
+                method: data.method
+            })
+        });
+        const payInfo = await resp.json();
+        if (!payInfo.merchantUid) {
+            document.getElementById('payResult').textContent = "결제 생성 실패: " + JSON.stringify(payInfo, null, 2);
+            return;
+        }
+
+        // 2. 아임포트 결제창 호출
         IMP.request_pay({
-            channelKey: "channel-key-0c91845c-a55e-43b2-81ee-660188a09eed",  // :contentReference[oaicite:10]{index=10}
-            pg:          "html5_inicis.INIpayTest",                        // :contentReference[oaicite:11]{index=11}
-            pay_method:  "card",
-            merchant_uid:`order_${new Date().getTime()}`,
-            name:        "테스트 상품",
-            amount:      100,
-            buyer_email: "alice@example.com",
-            buyer_name:  "Alice",
-            buyer_tel:   "010-1234-5678"
-        }, function(response) {
-            if (response.success) {
-                // 4) 승인 콜백: 기존 백엔드 confirm 엔드포인트 호출
-                fetch(`/api/payments/confirm?imp_uid=${response.imp_uid}&merchant_uid=${response.merchant_uid}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(response)
-                })
-                    .then(res => res.json())
-                    .then(data => console.log("결제 확인:", data));
+            pg: "html5_inicis", // 테스트: html5_inicis, kcp, kakaopay 등
+            pay_method: data.method,
+            merchant_uid: payInfo.merchantUid,
+            name: "포인트 충전",
+            amount: data.amount,
+            buyer_email: "test@abc.com",
+            buyer_name: "테스트유저",
+            buyer_tel: "01012341234"
+        }, async function(rsp) {
+            // 3. 결제 성공시 백엔드에 결제승인 전달
+            if (rsp.success) {
+                // imp_uid, merchant_uid, amount
+                const confirmResp = await fetch(
+                    `/payment/confirm?merchantUid=${encodeURIComponent(rsp.merchant_uid)}&impUid=${encodeURIComponent(rsp.imp_uid)}&amount=${encodeURIComponent(rsp.paid_amount)}`,
+                    { method: 'POST' }
+                );
+                const confirmResult = await confirmResp.json();
+                document.getElementById('payResult').textContent = "결제 성공!\n" + JSON.stringify(confirmResult, null, 2);
             } else {
-                console.error("결제 실패:", response.error_msg);
+                document.getElementById('payResult').textContent = "결제 실패: " + rsp.error_msg;
             }
         });
-    });
+    };
 </script>
 </body>
 </html>
