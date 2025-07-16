@@ -29,4 +29,12 @@ public class CommunityController {
         List<CommunityListResponseDto> communities = communityService.getAllCommunities();
         return ResponseEntity.ok(communities);
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<CommunityListResponseDto>> getMyCommunities(
+            @RequestParam Integer userId) {
+        List<CommunityListResponseDto> communities = communityService.getCommunitiesByUserId(userId);
+        return ResponseEntity.ok(communities);
+    }
+
 }
