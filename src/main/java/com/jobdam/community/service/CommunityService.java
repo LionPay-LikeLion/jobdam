@@ -88,6 +88,31 @@ public class CommunityService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<CommunityListResponseDto> getCommunitiesByUserId(Integer userId) {
+
+        List<Community> communities = communityRepository.findByUserId(userId); // 커스텀 쿼리 필요
+
+        return communities.stream()
+                .map(c -> CommunityListResponseDto.builder()
+                        .communityId(c.getCommunityId())
+                        .name(c.getName())
+                        .description(c.getDescription())
+                        .subscriptionLevelCode(
+                                subscriptionLevelCodeRepository.findById(c.getSubscriptionLevelCodeId())
+                                        .map(SubscriptionLevelCode::getCode)
+                                        .orElse(null)
+                        )
+                        .ownerNickname(c.getUser().getNickname())
+                        .maxMember(c.getMaxMember())
+                        .currentMember(c.getCurrentMember())
+                        .enterPoint(c.getEnterPoint())
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+
 
 
 

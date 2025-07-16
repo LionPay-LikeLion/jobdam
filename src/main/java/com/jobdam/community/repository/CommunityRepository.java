@@ -8,5 +8,7 @@ import java.util.List;
 public interface CommunityRepository extends JpaRepository<Community, Integer> {
 
     List<Community> findAllByOrderByCurrentMemberDesc();
+
+    List<Community> findByUserId(Integer userId);
 }
 
