@@ -13,4 +13,7 @@ public class SnsMessageResponseDto {
     private Long receiverId;
     private String content;
     private LocalDateTime createdAt;
+
+    private String senderNickname;
+    private String senderProfileImageUrl;
 }

@@ -12,6 +12,13 @@ public class SnsMessageMapper {
                 .receiverId(message.getReceiverId())
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
+
+                .senderNickname(
+                        message.getSender() != null ? message.getSender().getNickname() : null
+                )
+                .senderProfileImageUrl(
+                        message.getSender() != null ? message.getSender().getProfileImageUrl() : null
+                )
                 .build();
     }
 }
