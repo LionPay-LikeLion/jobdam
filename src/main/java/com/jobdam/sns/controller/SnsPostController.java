@@ -88,4 +88,15 @@ public class SnsPostController {
     public void deletePost(@PathVariable Integer postId, @RequestParam Integer userId) {
         snsPostService.deletePost(postId, userId);
     }
+
+    @Operation(
+            summary = "프리미엄 우선 피드 조회",
+            description = "프리미엄 회원의 게시글이 먼저 노출되도록 정렬된 피드를 조회합니다."
+    )
+    @GetMapping("/premium-priority")
+    public ResponseEntity<List<SnsPostResponseDto>> getPremiumPriorityFeed(@RequestParam Integer userId) {
+        List<SnsPostResponseDto> posts = snsPostService.getPremiumPriorityPosts(userId);
+        return ResponseEntity.ok(posts);
+    }
+
 }

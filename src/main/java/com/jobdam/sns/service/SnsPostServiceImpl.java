@@ -11,14 +11,15 @@ import com.jobdam.sns.dto.SnsPostDetailResponseDto;
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.sns.mapper.SnsPostMapper;
 import com.jobdam.sns.dto.SnsPostFilterDto;
+import com.jobdam.user.entity.User;
+import com.jobdam.sns.repository.BookmarkRepository;
 
 
 import com.jobdam.sns.repository.SnsPostRepository;
-//import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.jobdam.common.exception.LimitExceededException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -141,7 +142,7 @@ public class SnsPostServiceImpl implements SnsPostService {
     }
 
 
-    @Override
+    /*@Override
     @Transactional
     public Integer createPost(SnsPostRequestDto requestDto, Integer userId) {
         userRepository.findById(userId)
@@ -156,7 +157,31 @@ public class SnsPostServiceImpl implements SnsPostService {
 
         snsPostRepository.save(post);
         return post.getSnsPostId();
+    }*/
+    @Override
+    @Transactional
+    public Integer createPost(SnsPostRequestDto requestDto, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        if (user.getSubscriptionLevelCodeId() == 1) {
+            int postCount = snsPostRepository.countByUserIdInCurrentMonth(userId);
+            if (postCount >= 10) {
+                throw new LimitExceededException("일반 회원은 한 달에 최대 10개의 게시글만 작성할 수 있습니다.");
+            }
+        }
+
+        SnsPost post = new SnsPost();
+        post.setUserId(userId);
+        post.setTitle(requestDto.getTitle());
+        post.setContent(requestDto.getContent());
+        post.setImageUrl(requestDto.getImageUrl());
+        post.setAttachmentUrl(requestDto.getAttachmentUrl());
+
+        snsPostRepository.save(post);
+        return post.getSnsPostId();
     }
+
 
     @Override
     @Transactional
@@ -217,6 +242,22 @@ public class SnsPostServiceImpl implements SnsPostService {
                         bookmarkRepository.existsByUserIdAndSnsPostId(userId, post.getSnsPostId())
                 ))
                 .collect(Collectors.toList());
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<SnsPostResponseDto> getPremiumPriorityPosts(Integer currentUserId) {
+        List<SnsPost> posts = snsPostRepository.findAllOrderByPremiumFirst();
+
+        return posts.stream().map(post ->
+                SnsPostMapper.toDto(
+                        post,
+                        post.getUser(),
+                        likeRepository.countBySnsPostId(post.getSnsPostId()),
+                        snsCommentRepository.countBySnsPostId(post.getSnsPostId()),
+                        likeRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()),
+                        bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId())
+                )
+        ).collect(Collectors.toList());
     }
 
 

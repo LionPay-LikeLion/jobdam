@@ -25,4 +25,22 @@ import java.util.Optional;
     @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode WHERE u.userId = :userId ORDER BY p.createdAt DESC")
     List<SnsPost> findAllByUserIdWithUserAndMemberTypeCode(@Param("userId") Integer userId);
 
-}
+    @Query("""
+        SELECT p FROM SnsPost p
+        JOIN FETCH p.user u
+        ORDER BY 
+            CASE WHEN u.subscriptionLevelCodeId = 2 THEN 0 ELSE 1 END,
+            p.createdAt DESC
+        """)
+        List<SnsPost> findAllOrderByPremiumFirst();
+
+        @Query("""
+            SELECT COUNT(p) FROM SnsPost p
+            WHERE p.userId = :userId
+            AND YEAR(p.createdAt) = YEAR(CURRENT_DATE)
+            AND MONTH(p.createdAt) = MONTH(CURRENT_DATE)
+            """)
+        int countByUserIdInCurrentMonth(@Param("userId") Integer userId);
+
+
+    }

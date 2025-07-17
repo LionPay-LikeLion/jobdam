@@ -10,6 +10,7 @@ import com.jobdam.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.jobdam.common.exception.LimitExceededException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     private final SnsPostRepository snsPostRepository;
     private final UserRepository userRepository;
 
-    @Override
+   /* @Override
     @Transactional
     public void addBookmark(Integer userId, Integer snsPostId) {
         if (bookmarkRepository.existsByUserIdAndSnsPostId(userId, snsPostId)) {
@@ -36,7 +37,33 @@ public class BookmarkServiceImpl implements BookmarkService {
         bookmark.setCreatedAt(LocalDateTime.now());
 
         bookmarkRepository.save(bookmark);
-    }
+    }*/
+   @Override
+   @Transactional
+   public void addBookmark(Integer userId, Integer snsPostId) {
+       if (bookmarkRepository.existsByUserIdAndSnsPostId(userId, snsPostId)) {
+           throw new RuntimeException("이미 북마크된 게시글입니다.");
+       }
+
+       User user = userRepository.findById(userId)
+               .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+       // 일반 회원은 북마크 10개 제한
+       if (user.getSubscriptionLevelCodeId() == 1) {
+           int bookmarkCount = bookmarkRepository.countByUserId(userId);
+           if (bookmarkCount >= 10) {
+               throw new LimitExceededException("일반 회원은 최대 10개의 게시물을 북마크할 수 있습니다.");
+           }
+       }
+
+       Bookmark bookmark = new Bookmark();
+       bookmark.setUserId(userId);
+       bookmark.setSnsPostId(snsPostId);
+       bookmark.setCreatedAt(LocalDateTime.now());
+
+       bookmarkRepository.save(bookmark);
+   }
+
 
     @Override
     @Transactional

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.sns.entity.SnsPost;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter
@@ -53,7 +54,7 @@ public class User {
     @JoinColumn(name = "sns_post_id", insertable = false, updatable = false)
     private SnsPost post;
 */
-
+   @Schema(hidden = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "member_type_code_id",

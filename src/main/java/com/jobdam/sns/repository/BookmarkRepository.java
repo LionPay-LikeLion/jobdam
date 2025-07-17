@@ -13,4 +13,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Integer> {
     void deleteBySnsPostId(Integer snsPostId);
 
     boolean existsByUserIdAndSnsPostId(Integer userId, Integer snsPostId);
+    int countByUserId(Integer userId);
+
 }

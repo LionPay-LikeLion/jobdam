@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.jobdam.sns.entity.Like;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 
 @Getter @Setter
@@ -48,6 +49,7 @@ public class SnsPost {
     private List<Like> likes = new ArrayList<>();
 
     // user 객체
+    @Schema(hidden = true)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
