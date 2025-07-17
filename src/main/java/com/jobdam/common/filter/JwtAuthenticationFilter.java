@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        boolean skip = path.startsWith("/api/auth") || path.startsWith("/swagger") || path.startsWith("/v3") || path.startsWith("/api/member");
+        boolean skip = path.startsWith("/api/auth") || path.startsWith("/swagger") || path.startsWith("/v3");
         // 임시로 적어두었습니다. 필요한 부분 추가 필요합니다.
         System.out.println(">>>>> [JwtFilter] shouldNotFilter() - " + path + " -> " + skip);
         return skip;
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = claims.getSubject();
                 Integer roleId = Integer.valueOf(claims.get("role").toString());
 
-                String roleName = roleCodeService.getRoleNameById(roleId);
+                String roleName = "ROLE_" + roleCodeService.getRoleNameById(roleId);
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(roleName);
 
                 UsernamePasswordAuthenticationToken authentication =
@@ -63,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (JwtException | IllegalArgumentException e) {
+                System.out.println(">>>>> [JwtFilter] 예외 발생: " + e.getClass().getSimpleName() + " - " + e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
             }

@@ -11,9 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/member")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class MemberController {
+public class AuthAddController {
 
     private final AuthService authService;
     private final MailService memberService;

@@ -13,6 +13,6 @@ public class RoleCodeService {
     public String getRoleNameById(Integer roleCodeId) {
         return roleCodeRepository.findById(roleCodeId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid role code"))
-                .getName();
+                .getCode();
     }
 }
