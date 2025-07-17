@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface SnsPostRepository extends JpaRepository<SnsPost, Integer> {
+    public interface SnsPostRepository extends JpaRepository<SnsPost, Integer>, SnsPostCustomRepository {
 
     List<SnsPost> findByUserId(Integer userId);
     List<SnsPost> findByTitleContaining(String keyword);
     List<SnsPost> findAllByOrderByCreatedAtDesc();
+    List<SnsPost> findByTitleContainingOrContentContaining(String titleKeyword, String contentKeyword);
 
     @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode ORDER BY p.createdAt DESC")
     List<SnsPost> findAllWithUserAndMemberTypeCode();
