@@ -9,15 +9,29 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: ${DB_DRIVER_CLASS_NAME}
+    url: "${DB_URL}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    driver-class-name: "${DB_DRIVER_CLASS_NAME}"
   jpa:
     hibernate:
       ddl-auto: none  # in development (auto table create/modify)
       # ddl-auto: none  # in operation (manual sql management)
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "jobdamoffice@gmail.com"
+    password: "${MAIL_PASSWORD}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secret: "${JWT_SECRET}"
 
 management:
   endpoints:
@@ -31,9 +45,10 @@ management:
     export:
       prometheus:
         enabled: true
+
 port-one:
-  base-url: ${PORTONE_BASE_URL}
-  api-key:    ${PORTONE_API_KEY}
-  api-secret: ${PORTONE_API_SECRET}
-  customer-code: ${PORTONE_CUSTOMER_CODE}
+  base-url: "${PORTONE_BASE_URL}"
+  api-key: "${PORTONE_API_KEY}"
+  api-secret: "${PORTONE_API_SECRET}"
+  customer-code: "${PORTONE_CUSTOMER_CODE}"
   test-mode: false

@@ -3,6 +3,8 @@ package com.jobdam.community.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import com.jobdam.user.entity.User;
+import com.jobdam.code.entity.SubscriptionLevelCode;
+
 
 @Getter @Setter
 @Entity
@@ -36,9 +38,14 @@ public class Community {
     @Column(name = "enter_point")
     private Integer enterPoint;
 
-    @Column(name = "max_member")
-    private Integer maxMember;
-
     @Column(name = "current_member")
     private Integer currentMember;
+
+    @Column(name = "max_member", columnDefinition = "INT DEFAULT 30")
+    private Integer maxMember;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_level_code_id", insertable = false, updatable = false)
+    private SubscriptionLevelCode subscriptionLevelCode;
+
 }
