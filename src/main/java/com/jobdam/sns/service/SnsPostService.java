@@ -22,4 +22,6 @@ public interface SnsPostService {
 
     List<SnsPostResponseDto> searchPostsByKeyword(String keyword, Integer userId);
 
+    List<SnsPostResponseDto> getPremiumPriorityPosts(Integer currentUserId);
+
 }
