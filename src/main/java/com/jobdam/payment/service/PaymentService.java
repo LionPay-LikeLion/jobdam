@@ -3,7 +3,6 @@ package com.jobdam.payment.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jobdam.payment.client.PortOneClient;
 import com.jobdam.payment.dto.CancelPaymentRequestDto;
 import com.jobdam.payment.dto.PaymentRequestDto;
