@@ -13,6 +13,7 @@ import java.util.Optional;
     List<SnsPost> findByUserId(Integer userId);
     List<SnsPost> findByTitleContaining(String keyword);
     List<SnsPost> findAllByOrderByCreatedAtDesc();
+    List<SnsPost> findByTitleContainingOrContentContaining(String titleKeyword, String contentKeyword);
 
     @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode ORDER BY p.createdAt DESC")
     List<SnsPost> findAllWithUserAndMemberTypeCode();

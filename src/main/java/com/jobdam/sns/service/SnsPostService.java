@@ -4,7 +4,6 @@ import com.jobdam.sns.dto.SnsPostFilterDto;
 import com.jobdam.sns.dto.SnsPostRequestDto;
 import com.jobdam.sns.dto.SnsPostResponseDto;
 import com.jobdam.sns.dto.SnsPostDetailResponseDto;
-
 import java.util.List;
 
 public interface SnsPostService {
@@ -20,5 +19,7 @@ public interface SnsPostService {
     List<SnsPostResponseDto> getFilteredPosts(SnsPostFilterDto filter, Integer currentUserId);
 
     List<SnsPostResponseDto> getMyPosts(Integer currentUserId);
+
+    List<SnsPostResponseDto> searchPostsByKeyword(String keyword, Integer userId);
 
 }

@@ -203,4 +203,22 @@ public class SnsPostServiceImpl implements SnsPostService {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public List<SnsPostResponseDto> searchPostsByKeyword(String keyword, Integer userId) {
+        List<SnsPost> posts = snsPostRepository.findByTitleContainingOrContentContaining(keyword, keyword);
+
+        return posts.stream()
+                .map(post -> SnsPostMapper.toDto(
+                        post,
+                        post.getUser(),
+                        likeRepository.countBySnsPostId(post.getSnsPostId()),
+                        snsCommentRepository.countBySnsPostId(post.getSnsPostId()),
+                        likeRepository.existsByUserIdAndSnsPostId(userId, post.getSnsPostId()),
+                        bookmarkRepository.existsByUserIdAndSnsPostId(userId, post.getSnsPostId())
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+
 }
