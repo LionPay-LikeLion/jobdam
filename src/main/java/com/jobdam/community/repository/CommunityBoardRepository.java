@@ -9,5 +9,7 @@ import java.util.List;
 public interface CommunityBoardRepository extends JpaRepository<CommunityBoard, Integer> {
 
     List<CommunityBoard> findAllByCommunityIdOrderByCreatedAtDesc(Integer communityId);
+    int countByCommunityId(Integer communityId);
+
 }
 
