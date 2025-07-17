@@ -1,0 +1,61 @@
+package com.jobdam.community.controller;
+
+import com.jobdam.community.dto.CommunityBoardCreateRequestDto;
+import com.jobdam.community.dto.CommunityPostCreateRequestDto;
+import com.jobdam.community.dto.CommunityPostListResponseDto;
+import com.jobdam.community.dto.CommunityPostUpdateRequestDto;
+import com.jobdam.community.service.CommunityPostService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/communities/{communityId}/boards/{boardId}/posts")
+public class CommunityPostController {
+
+    private final CommunityPostService communityPostService;
+
+    @GetMapping
+    public ResponseEntity<List<CommunityPostListResponseDto>> getPosts(
+            @PathVariable Integer boardId,
+            @RequestParam(required = false) String postTypeCode,
+            @RequestParam(required = false) String keyword
+    ) {
+        List<CommunityPostListResponseDto> dto = communityPostService.getPostsByBoard(boardId, postTypeCode, keyword);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping
+    public ResponseEntity<Integer> createPost(
+            @PathVariable Integer boardId,
+            @RequestBody CommunityPostCreateRequestDto dto,
+            @RequestParam Integer userId
+    ) {
+        Integer postId = communityPostService.createPost(dto, boardId, userId);
+        return ResponseEntity.ok(postId);
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<Void> updatePost(
+            @PathVariable Integer postId,
+            @RequestBody CommunityPostUpdateRequestDto dto,
+            @RequestParam Integer userId
+    ) {
+        communityPostService.updatePost(dto, postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Integer postId,
+            @RequestParam Integer userId
+    ) {
+        communityPostService.softDelete(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+
+}

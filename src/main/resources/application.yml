@@ -1,8 +1,11 @@
 server:
-  port: 8081  # 8080
+  #port: 8081
   forward-headers-strategy: framework
 
 spring:
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
   config:
     import: optional:file:.env[.properties]
   datasource:
@@ -12,7 +15,7 @@ spring:
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
   jpa:
     hibernate:
-      ddl-auto: update  # in development (auto table create/modify)
+      ddl-auto: none  # in development (auto table create/modify)
       # ddl-auto: none  # in operation (manual sql management)
     show-sql: true
 
@@ -28,3 +31,9 @@ management:
     export:
       prometheus:
         enabled: true
+port-one:
+  base-url: ${PORTONE_BASE_URL}
+  api-key:    ${PORTONE_API_KEY}
+  api-secret: ${PORTONE_API_SECRET}
+  customer-code: ${PORTONE_CUSTOMER_CODE}
+  test-mode: false
