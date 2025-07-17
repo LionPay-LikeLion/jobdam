@@ -8,11 +8,10 @@ import com.jobdam.sns.repository.LikeRepository;
 import com.jobdam.sns.repository.SnsCommentRepository;
 import com.jobdam.user.repository.UserRepository;
 import com.jobdam.sns.dto.SnsPostDetailResponseDto;
-import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.sns.mapper.SnsPostMapper;
 import com.jobdam.sns.dto.SnsPostFilterDto;
 import com.jobdam.user.entity.User;
-import com.jobdam.sns.repository.BookmarkRepository;
+
 
 
 import com.jobdam.sns.repository.SnsPostRepository;
@@ -141,23 +140,6 @@ public class SnsPostServiceImpl implements SnsPostService {
                 .build();
     }
 
-
-    /*@Override
-    @Transactional
-    public Integer createPost(SnsPostRequestDto requestDto, Integer userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        SnsPost post = new SnsPost();
-        post.setUserId(userId);
-        post.setTitle(requestDto.getTitle());
-        post.setContent(requestDto.getContent());
-        post.setImageUrl(requestDto.getImageUrl());
-        post.setAttachmentUrl(requestDto.getAttachmentUrl());
-
-        snsPostRepository.save(post);
-        return post.getSnsPostId();
-    }*/
     @Override
     @Transactional
     public Integer createPost(SnsPostRequestDto requestDto, Integer userId) {

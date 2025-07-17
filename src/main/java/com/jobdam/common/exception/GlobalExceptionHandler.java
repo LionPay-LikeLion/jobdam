@@ -19,5 +19,4 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", e.getMessage()));
     }
 
-    // 필요하다면 다른 예외도 추가 가능
 }

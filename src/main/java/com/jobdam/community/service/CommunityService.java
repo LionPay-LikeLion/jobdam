@@ -91,7 +91,7 @@ public class CommunityService {
     @Transactional(readOnly = true)
     public List<CommunityListResponseDto> getCommunitiesByUserId(Integer userId) {
 
-        List<Community> communities = communityRepository.findByUserId(userId); // 커스텀 쿼리 필요
+        List<Community> communities = communityRepository.findByUserId(userId);
 
         return communities.stream()
                 .map(c -> CommunityListResponseDto.builder()

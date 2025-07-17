@@ -24,20 +24,6 @@ public class BookmarkServiceImpl implements BookmarkService {
     private final SnsPostRepository snsPostRepository;
     private final UserRepository userRepository;
 
-   /* @Override
-    @Transactional
-    public void addBookmark(Integer userId, Integer snsPostId) {
-        if (bookmarkRepository.existsByUserIdAndSnsPostId(userId, snsPostId)) {
-            throw new RuntimeException("이미 북마크된 게시글입니다.");
-        }
-
-        Bookmark bookmark = new Bookmark();
-        bookmark.setUserId(userId);
-        bookmark.setSnsPostId(snsPostId);
-        bookmark.setCreatedAt(LocalDateTime.now());
-
-        bookmarkRepository.save(bookmark);
-    }*/
    @Override
    @Transactional
    public void addBookmark(Integer userId, Integer snsPostId) {

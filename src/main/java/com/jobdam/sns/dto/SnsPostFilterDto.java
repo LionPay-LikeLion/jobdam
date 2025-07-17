@@ -11,9 +11,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class SnsPostFilterDto {
 
-    // 작성자 유형 필터: GENERAL, HUNTER, EMPLOYEE
     private String memberType;
-
-    // 정렬 기준: latest(기본), likes
     private String sort = "latest";
 }

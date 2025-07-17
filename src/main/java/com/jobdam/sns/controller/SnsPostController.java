@@ -39,9 +39,6 @@ public class SnsPostController {
     }
 
 
-
-    // 필터 기반 게시글 조회 (작성자 유형 + 정렬 기준)
-
     @GetMapping("/filter")
     public List<SnsPostResponseDto> getFilteredPosts(
             @ModelAttribute SnsPostFilterDto filter,
@@ -50,19 +47,15 @@ public class SnsPostController {
         return snsPostService.getFilteredPosts(filter, userId);
     }
 
-
-    // 전체 게시글 조회
     @GetMapping
     public List<SnsPostResponseDto> getAllPosts(@RequestParam Integer userId) {
         return snsPostService.getAllPosts(userId);
     }
 
-    // 내 피드(내가 쓴 게시글) 조회
     @GetMapping("/my")
     public List<SnsPostResponseDto> getMyPosts(@RequestParam Integer userId) {
         return snsPostService.getMyPosts(userId);
     }
-
 
     @GetMapping("/{postId}")
     public SnsPostDetailResponseDto getPostDetail(@PathVariable Integer postId,

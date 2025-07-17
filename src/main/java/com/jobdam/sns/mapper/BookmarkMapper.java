@@ -14,7 +14,7 @@ public class BookmarkMapper {
         Bookmark bookmark = new Bookmark();
         bookmark.setSnsPostId(dto.getSnsPostId());
         bookmark.setUserId(userId);
-        bookmark.setCreatedAt(LocalDateTime.now()); // 북마크 시간 설정
+        bookmark.setCreatedAt(LocalDateTime.now());
         return bookmark;
     }
 

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "message") // 테이블 이름은 실제 DB 이름과 소문자까지 일치해야 함
+@Table(name = "message")
 public class SnsMessage {
 
     @Id

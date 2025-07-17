@@ -19,16 +19,16 @@ public class Report {
     private Integer reportId;
 
     @Column(name = "report_type_code_id", nullable = false)
-    private Integer reportTypeCodeId; // 신고 타입 (1: POST, 2: COMMENT, 3: USER)
+    private Integer reportTypeCodeId;
 
     @Column(name = "target_id", nullable = false)
-    private Long targetId; // 어떤 대상에 대한 신고인지 (예: post_id, comment_id 등)
+    private Long targetId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId; // 신고자 ID
+    private Integer userId;
 
     @Column(name = "reason", nullable = false, columnDefinition = "TEXT")
-    private String reason; // 신고 사유
+    private String reason;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
