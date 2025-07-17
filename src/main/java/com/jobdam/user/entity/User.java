@@ -47,10 +47,6 @@ public class User {
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_type_code_id", insertable = false, updatable = false)
-    private MemberTypeCode memberTypeCode;
-*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

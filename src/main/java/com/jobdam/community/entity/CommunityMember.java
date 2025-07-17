@@ -1,5 +1,6 @@
 package com.jobdam.community.entity;
 
+import com.jobdam.code.entity.CommunityMemberRoleCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,8 +35,12 @@ public class CommunityMember {
     @Column(name = "joined_at")
     private LocalDateTime joinedAt;
 
-    // user만 객체로!
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_member_role_code_id", insertable = false, updatable = false)
+    private CommunityMemberRoleCode communityMemberRoleCode;
 }
