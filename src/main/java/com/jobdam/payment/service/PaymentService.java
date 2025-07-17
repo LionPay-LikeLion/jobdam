@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final PointService pointService;
 
     @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto dto) {
@@ -47,6 +48,9 @@ public class PaymentService {
         payment.setAmount(amount);
         payment.setPaymentStatusCodeId(PaymentStatusCode.SUCCESS.getCode());
         paymentRepository.save(payment);
+
+        pointService.addPoint(payment.getUserId(), payment.getPoint());
+
         return toDto(payment);
     }
 
