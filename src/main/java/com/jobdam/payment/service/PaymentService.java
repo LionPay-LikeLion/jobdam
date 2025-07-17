@@ -1,11 +1,9 @@
-// src/main/java/com/jobdam/payment/service/PaymentService.java
 package com.jobdam.payment.service;
 
 import com.jobdam.payment.dto.PaymentRequestDto;
 import com.jobdam.payment.dto.PaymentResponseDto;
 import com.jobdam.payment.entity.Payment;
 import com.jobdam.payment.entity.PaymentStatusCode;
-import com.jobdam.payment.entity.ChargeOption;
 import com.jobdam.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,16 +20,14 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto dto) {
-        ChargeOption option = ChargeOption.fromCode(dto.getChargeOption());
-        String merchantUid = "order-" + UUID.randomUUID();  // 여기서만 UID 생성
         Payment payment = Payment.builder()
                 .userId(dto.getUserId())
-                .point(option.getPoint())
-                .amount(option.getAmount())
+                .point(dto.getPoint())
+                .amount(dto.getAmount())
                 .paymentTypeCodeId(dto.getPaymentTypeCodeId())
-                .paymentStatusCodeId(PaymentStatusCode.FAILED.getCode()) // 최초는 실패(미결)
+                .paymentStatusCodeId(PaymentStatusCode.FAILED.getCode()) // 기본 실패로 생성
                 .method(dto.getMethod())
-                .merchantUid(merchantUid)
+                .merchantUid(dto.getMerchantUid())
                 .createdAt(LocalDateTime.now())
                 .build();
         Payment saved = paymentRepository.save(payment);
@@ -67,12 +62,11 @@ public class PaymentService {
     }
 
     private PaymentResponseDto toDto(Payment p) {
-        String status = PaymentStatusCode.fromCode(p.getPaymentStatusCodeId()).name();
         return PaymentResponseDto.builder()
                 .merchantUid(p.getMerchantUid())
                 .impUid(p.getImpUid())
                 .amount(p.getAmount())
-                .paymentStatus(status)
+                .paymentStatusCodeId(p.getPaymentStatusCodeId())
                 .method(p.getMethod())
                 .createdAt(p.getCreatedAt())
                 .build();

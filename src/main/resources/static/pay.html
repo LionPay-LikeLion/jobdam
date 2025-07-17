@@ -2,117 +2,80 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>포인트 충전 테스트</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <title>PortOne 결제 연동 테스트</title>
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <style>
-        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background: #f7f9fa; }
-        .charge-wrap { max-width: 400px; margin: 48px auto; padding: 2.5rem 2rem 2rem; background: #fff; border-radius: 16px; box-shadow: 0 3px 24px #0002; }
-        h2 { margin-top: 0; margin-bottom: 1.5rem; color: #222; }
-        .input-row { margin-bottom: 1.5rem; }
-        label { font-weight: 500; }
-        select, input { font-size: 1rem; width: 100%; margin-top: 0.5rem; padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid #ccc; }
-        button { width: 100%; background: #2d7eff; color: #fff; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; padding: 1rem; margin-top: 0.8rem; cursor: pointer; transition: background 0.2s;}
-        button:hover { background: #215ec9; }
-        .result-box { background: #f1f5ff; border-radius: 8px; margin-top: 2rem; padding: 1.2rem; font-size: 0.98rem; color: #234; word-break: break-all;}
-        .err { color: #e33; }
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        input, button { margin: 0.2rem; padding: 0.4rem; }
+        pre { background: #f3f3f3; padding: 1rem; }
     </style>
 </head>
 <body>
-<div class="charge-wrap">
-    <h2>포인트 충전 테스트</h2>
-    <div class="input-row">
-        <label for="userId">유저ID (예: 1)</label>
-        <input type="number" id="userId" min="1" value="1" required />
-    </div>
-    <div class="input-row">
-        <label for="chargeOption">충전 상품 선택</label>
-        <select id="chargeOption" required>
-            <option value="BASIC_10000">1만원 충전 (1만P)</option>
-            <option value="BONUS_20000">2만원 충전 (2.2만P)</option>
-            <option value="BONUS_30000">3만원 충전 (3.5만P)</option>
-            <option value="BONUS_40000">4만원 충전 (4.8만P)</option>
-            <option value="PROMO_50000">5만원 충전 (6만P)</option>
-        </select>
-    </div>
-    <div class="input-row">
-        <label for="method">결제 수단</label>
-        <select id="method">
-            <option value="CARD">신용카드</option>
-        </select>
-    </div>
-    <div class="input-row">
-        <label for="paymentTypeCodeId">결제 타입 코드 (예: 1)</label>
-        <input type="number" id="paymentTypeCodeId" min="1" value="1" required />
-    </div>
-    <button id="chargeBtn">포인트 충전 결제</button>
-    <div class="result-box" id="result"></div>
-</div>
+<h2>포트원(아임포트) 결제 연동 테스트</h2>
+
+<form id="payForm">
+    <input name="userId" placeholder="유저ID" value="5"/><br>
+    <input name="point" placeholder="포인트" value="100000000"/><br>
+    <input name="amount" placeholder="결제금액" value="100"/><br>
+    <input name="method" placeholder="결제수단(card, kakao, toss 등)" value="card"/><br>
+    <button type="submit">결제하기</button>
+</form>
+
+<pre id="payResult"></pre>
+
 <script>
-    document.getElementById("chargeBtn").onclick = async function() {
-        const userId = document.getElementById('userId').value;
-        const chargeOption = document.getElementById('chargeOption').value;
-        const method = document.getElementById('method').value;
-        const paymentTypeCodeId = document.getElementById('paymentTypeCodeId').value;
-        const $result = document.getElementById('result');
-        $result.innerHTML = "";
+    // IMP 변수는 iamport.js 로드 시 자동 등록됨, 중복 선언 불필요
+    IMP.init("imp00213017"); // ← 네 가맹점 코드로 설정!
 
-        // [1] 주문 생성 (merchantUid는 서버에서 발급됨. 반드시 이 값만 사용할 것)
-        let created;
-        try {
-            const res = await axios.post('/api/payment/create', {
-                userId: Number(userId),
-                chargeOption,
-                method,
-                paymentTypeCodeId: Number(paymentTypeCodeId)
-            });
-            created = res.data;
-            console.log('[DEBUG] created.merchantUid:', created.merchantUid);
-        } catch (e) {
-            $result.innerHTML = `<span class="err">[주문생성 에러] ${e?.response?.data?.message || e.message}</span>`;
+    document.getElementById('payForm').onsubmit = async function(e) {
+        e.preventDefault();
+
+        const data = Object.fromEntries(new FormData(e.target).entries());
+
+        // 1. 백엔드에 먼저 결제정보 생성(merchant_uid 발급)
+        const resp = await fetch('/payment/create', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                userId: data.userId,
+                point: data.point,
+                amount: data.amount,
+                paymentTypeCodeId: 1,
+                paymentStatusCodeId: 2,
+                merchantUid: "mid_" + Date.now(), // 유니크 값 생성
+                method: data.method
+            })
+        });
+        const payInfo = await resp.json();
+        if (!payInfo.merchantUid) {
+            document.getElementById('payResult').textContent = "결제 생성 실패: " + JSON.stringify(payInfo, null, 2);
             return;
         }
 
-        // [2] 아임포트 결제창 호출
-        if (!window.IMP) {
-            alert("아임포트 스크립트 미로딩!");
-            return;
-        }
-        const IMP = window.IMP;
-        IMP.init("imp00213017"); // 본인 가맹점 코드로 교체
-
+        // 2. 아임포트 결제창 호출
         IMP.request_pay({
-            pg: "html5_inicis",
-            pay_method: "card",
-            merchant_uid: created.merchantUid,   // 서버에서 받은 merchantUid만 사용!
+            pg: "html5_inicis", // 테스트: html5_inicis, kcp, kakaopay 등
+            pay_method: data.method,
+            merchant_uid: payInfo.merchantUid,
             name: "포인트 충전",
-            amount: created.amount,
-            buyer_email: "user@email.com",
-            buyer_name: "테스트고객"
-        }, async function (rsp) {
-            // [3] 결제창 콜백
-            // 반드시 created.merchantUid와 rsp.merchant_uid가 같은지 콘솔 확인!
-            console.log('[DEBUG] created.merchantUid:', created.merchantUid, 'rsp.merchant_uid:', rsp.merchant_uid);
-
+            amount: data.amount,
+            buyer_email: "test@abc.com",
+            buyer_name: "테스트유저",
+            buyer_tel: "01012341234"
+        }, async function(rsp) {
+            // 3. 결제 성공시 백엔드에 결제승인 전달
             if (rsp.success) {
-                // [4] 결제 확인: merchantUid는 반드시 created.merchantUid 사용!
-                try {
-                    const confirmRes = await axios.post('/api/payment/confirm', null, {
-                        params: {
-                            merchantUid: created.merchantUid,
-                            impUid: rsp.imp_uid,
-                            amount: rsp.paid_amount
-                        }
-                    });
-                    $result.innerHTML = `<b>✅ 결제 성공!</b><br><pre>${JSON.stringify(confirmRes.data, null, 2)}</pre>`;
-                } catch (err) {
-                    $result.innerHTML = `<span class="err">[결제확인 에러] ${err?.response?.data?.message || err.message}</span>`;
-                }
+                // imp_uid, merchant_uid, amount
+                const confirmResp = await fetch(
+                    `/payment/confirm?merchantUid=${encodeURIComponent(rsp.merchant_uid)}&impUid=${encodeURIComponent(rsp.imp_uid)}&amount=${encodeURIComponent(rsp.paid_amount)}`,
+                    { method: 'POST' }
+                );
+                const confirmResult = await confirmResp.json();
+                document.getElementById('payResult').textContent = "결제 성공!\n" + JSON.stringify(confirmResult, null, 2);
             } else {
-                $result.innerHTML = `<span class="err">[결제실패] ${rsp.error_msg}</span>`;
+                document.getElementById('payResult').textContent = "결제 실패: " + rsp.error_msg;
             }
         });
-    }
+    };
 </script>
 </body>
 </html>
