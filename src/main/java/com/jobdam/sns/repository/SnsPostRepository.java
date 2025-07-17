@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface SnsPostRepository extends JpaRepository<SnsPost, Integer> {
+    public interface SnsPostRepository extends JpaRepository<SnsPost, Integer>, SnsPostCustomRepository {
 
     List<SnsPost> findByUserId(Integer userId);
     List<SnsPost> findByTitleContaining(String keyword);

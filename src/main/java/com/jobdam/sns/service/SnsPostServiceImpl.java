@@ -9,6 +9,9 @@ import com.jobdam.sns.repository.SnsCommentRepository;
 import com.jobdam.user.repository.UserRepository;
 import com.jobdam.sns.dto.SnsPostDetailResponseDto;
 import com.jobdam.code.entity.MemberTypeCode;
+import com.jobdam.sns.mapper.SnsPostMapper;
+import com.jobdam.sns.dto.SnsPostFilterDto;
+
 
 import com.jobdam.sns.repository.SnsPostRepository;
 //import jakarta.transaction.Transactional;
@@ -183,4 +186,21 @@ public class SnsPostServiceImpl implements SnsPostService {
 
         snsPostRepository.delete(post);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<SnsPostResponseDto> getFilteredPosts(SnsPostFilterDto filter, Integer currentUserId) {
+        List<SnsPost> posts = snsPostRepository.searchFilteredPosts(filter);
+
+        return posts.stream().map(post -> {
+            return SnsPostMapper.toDto(
+                    post,
+                    post.getUser(),
+                    likeRepository.countBySnsPostId(post.getSnsPostId()),
+                    snsCommentRepository.countBySnsPostId(post.getSnsPostId()),
+                    likeRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId()),
+                    bookmarkRepository.existsByUserIdAndSnsPostId(currentUserId, post.getSnsPostId())
+            );
+        }).collect(Collectors.toList());
+    }
+
 }

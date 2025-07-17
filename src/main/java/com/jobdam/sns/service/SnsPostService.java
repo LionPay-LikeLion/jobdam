@@ -1,5 +1,6 @@
 package com.jobdam.sns.service;
 
+import com.jobdam.sns.dto.SnsPostFilterDto;
 import com.jobdam.sns.dto.SnsPostRequestDto;
 import com.jobdam.sns.dto.SnsPostResponseDto;
 import com.jobdam.sns.dto.SnsPostDetailResponseDto;
@@ -16,6 +17,7 @@ public interface SnsPostService {
 
     void updatePost(Integer postId, SnsPostRequestDto requestDto, Integer userId);
     void deletePost(Integer postId, Integer userId);
+    List<SnsPostResponseDto> getFilteredPosts(SnsPostFilterDto filter, Integer currentUserId);
 
     List<SnsPostResponseDto> getMyPosts(Integer currentUserId);
 

@@ -7,6 +7,7 @@ import com.jobdam.sns.dto.SnsPostDetailResponseDto;
 import com.jobdam.sns.service.SnsPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import com.jobdam.sns.dto.SnsPostFilterDto;
 
 import java.util.List;
 
@@ -16,6 +17,17 @@ import java.util.List;
 public class SnsPostController {
 
     private final SnsPostService snsPostService;
+
+    // 필터 기반 게시글 조회 (작성자 유형 + 정렬 기준)
+
+    @GetMapping("/filter")
+    public List<SnsPostResponseDto> getFilteredPosts(
+            @ModelAttribute SnsPostFilterDto filter,
+            @RequestParam Integer userId
+    ) {
+        return snsPostService.getFilteredPosts(filter, userId);
+    }
+
 
     // 전체 게시글 조회
     @GetMapping
