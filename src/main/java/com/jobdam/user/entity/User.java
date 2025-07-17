@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 import com.jobdam.code.entity.MemberTypeCode;
+import com.jobdam.sns.entity.SnsPost;
+
 
 @Getter
 @Setter
@@ -47,6 +49,10 @@ public class User {
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
+   /* @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sns_post_id", insertable = false, updatable = false)
+    private SnsPost post;
+*/
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

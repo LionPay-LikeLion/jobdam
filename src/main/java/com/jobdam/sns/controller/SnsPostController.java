@@ -7,8 +7,16 @@ import com.jobdam.sns.dto.SnsPostDetailResponseDto;
 import com.jobdam.sns.service.SnsPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import com.jobdam.sns.dto.SnsPostFilterDto;
 
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/sns/posts")
@@ -16,6 +24,32 @@ import java.util.List;
 public class SnsPostController {
 
     private final SnsPostService snsPostService;
+
+    @Operation(
+            summary = "SNS 게시글 키워드 검색",
+            description = "제목 또는 본문 내용에 포함된 텍스트로 게시글을 검색합니다."
+    )
+    @GetMapping("/search")
+    public ResponseEntity<List<SnsPostResponseDto>> searchPosts(
+            @Parameter(description = "검색 키워드 (제목 또는 본문 기준)") @RequestParam String keyword,
+            @RequestParam(required = false) Integer userId
+    ) {
+        List<SnsPostResponseDto> results = snsPostService.searchPostsByKeyword(keyword, userId);
+        return ResponseEntity.ok(results);
+    }
+
+
+
+    // 필터 기반 게시글 조회 (작성자 유형 + 정렬 기준)
+
+    @GetMapping("/filter")
+    public List<SnsPostResponseDto> getFilteredPosts(
+            @ModelAttribute SnsPostFilterDto filter,
+            @RequestParam Integer userId
+    ) {
+        return snsPostService.getFilteredPosts(filter, userId);
+    }
+
 
     // 전체 게시글 조회
     @GetMapping

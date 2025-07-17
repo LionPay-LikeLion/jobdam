@@ -6,6 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.jobdam.sns.entity.Like;
+
+
 @Getter @Setter
 @Entity
 @Table(name = "sns_post")
@@ -38,6 +43,9 @@ public class SnsPost {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
 
     // user 객체
     @ManyToOne(fetch = FetchType.LAZY)
