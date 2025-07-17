@@ -11,7 +11,7 @@ public class PaymentResponseDto {
     private String merchantUid;
     private String impUid;
     private Integer amount;
-    private Integer paymentStatusCodeId;
+    private String paymentStatus; // "SUCCESS", "FAILED", "CANCELLED"
     private String method;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
