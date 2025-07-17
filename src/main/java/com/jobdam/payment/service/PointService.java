@@ -32,4 +32,11 @@ public class PointService {
         user.setPoint(current - point);
         userRepository.save(user);
     }
+
+    public int getUserPoint(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+        return user.getPoint() == null ? 0 : user.getPoint();
+    }
+
 }
