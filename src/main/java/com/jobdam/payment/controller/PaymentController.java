@@ -1,3 +1,4 @@
+// src/main/java/com/jobdam/payment/controller/PaymentController.java
 package com.jobdam.payment.controller;
 
 import com.jobdam.payment.dto.PaymentRequestDto;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("/api/payment")
 @RequiredArgsConstructor
 public class PaymentController {
 
