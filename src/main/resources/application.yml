@@ -31,3 +31,9 @@ management:
     export:
       prometheus:
         enabled: true
+port-one:
+  base-url: ${PORTONE_BASE_URL}
+  api-key:    ${PORTONE_API_KEY}
+  api-secret: ${PORTONE_API_SECRET}
+  customer-code: ${PORTONE_CUSTOMER_CODE}
+  test-mode: false

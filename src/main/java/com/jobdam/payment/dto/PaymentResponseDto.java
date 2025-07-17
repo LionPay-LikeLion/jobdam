@@ -11,8 +11,8 @@ public class PaymentResponseDto {
     private String merchantUid;
     private String impUid;
     private Integer amount;
-    private int paymentStatusCodeId;
+    private Integer paymentStatusCodeId;
     private String method;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 }
