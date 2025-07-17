@@ -13,7 +13,6 @@ import com.jobdam.community.repository.CommunityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,7 @@ public class CommunityBoardService {
     private final BoardStatusCodeRepository boardStatusCodeRepository;
     private final CommunityRepository communityRepository;
 
-    @Transactional
+   /* @Transactional
     public Integer createBoard(CommunityBoardCreateRequestDto dto, Integer communityId) {
 
         Community community = communityRepository.findById(communityId)
@@ -52,7 +51,7 @@ public class CommunityBoardService {
 
         return board.getCommunityBoardId();
     }
-
+*/
     @Transactional(readOnly = true)
     public List<CommunityBoardListResponseDto> getAllBoardsByCommunityId(Integer communityId) {
         List<CommunityBoard> boards = communityBoardRepository.findAllByCommunityIdOrderByCreatedAtDesc(communityId);
@@ -75,6 +74,36 @@ public class CommunityBoardService {
                         .build()
                 )
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void createBoard(Integer communityId, CommunityBoardCreateRequestDto dto) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
+
+        // BASIC 커뮤니티이면 개수 제한 확인
+        if (community.getSubscriptionLevelCodeId() == 1) { // BASIC
+            int boardCount = communityBoardRepository.countByCommunityId(communityId);
+            if (boardCount >= 10) {
+                throw new RuntimeException("일반 커뮤니티는 최대 10개의 게시판만 생성할 수 있습니다.");
+            }
+        }
+
+        BoardTypeCode boardTypeCode = boardTypeCodeRepository.findByCode(dto.getBoardTypeCode())
+                .orElseThrow(() -> new RuntimeException("게시판 타입을 찾을 수 없습니다."));
+
+        int boardStatusCodeId = 1;
+
+        // 게시판 생성
+        CommunityBoard board = CommunityBoard.builder()
+                .communityId(communityId)
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .boardTypeCodeId(boardTypeCode.getBoardTypeCodeId())
+                .boardStatusCodeId(boardStatusCodeId)
+                .build();
+
+        communityBoardRepository.save(board);
     }
 
 }
