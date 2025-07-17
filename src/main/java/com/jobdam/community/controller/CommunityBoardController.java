@@ -17,14 +17,24 @@ public class CommunityBoardController {
 
     private final CommunityBoardService communityBoardService;
 
-    @PostMapping
+   /* @PostMapping
     public ResponseEntity<Integer> createBoard(
             @PathVariable Integer communityId,
             @RequestBody CommunityBoardCreateRequestDto dto
     ) {
         Integer boardId = communityBoardService.createBoard(dto, communityId);
         return ResponseEntity.ok(boardId);
+    }*/
+
+    @PostMapping
+    public ResponseEntity<String> createBoard(
+            @PathVariable Integer communityId,
+            @RequestBody CommunityBoardCreateRequestDto dto
+    ) {
+        communityBoardService.createBoard(communityId, dto);
+        return ResponseEntity.ok("게시판이 생성되었습니다.");
     }
+
 
     @GetMapping
     public ResponseEntity<List<CommunityBoardListResponseDto>> getAllCommunities(@PathVariable Integer communityId) {
