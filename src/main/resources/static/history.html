@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 · 포인트 내역</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f6f8fa; margin: 0; padding: 40px;}
+        h1 { font-size: 2em; margin-bottom: 10px;}
+        .point-summary { background: #fff; padding: 16px 24px; border-radius: 12px; box-shadow: 0 2px 10px #0001; font-size: 1.3em; margin-bottom: 24px; }
+        .user-select { margin-bottom: 24px; }
+        select { font-size: 1em; padding: 6px 18px; border-radius: 6px; border: 1px solid #ccc;}
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; background: #fff; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 12px 8px; text-align: center; }
+        th { background: #f0f3f6; }
+        tr:nth-child(even) { background: #f7faff; }
+        .green { color: #2ec700; font-weight: bold;}
+        .orange { color: #ff9800; font-weight: bold;}
+        .red { color: #e53935; font-weight: bold;}
+        .gray { color: #999; }
+        .sec-title { font-size: 1.15em; margin: 24px 0 6px 0;}
+        .label { padding: 4px 10px; border-radius: 12px; font-size: 0.9em;}
+        .green-bg { background: #e9fae8;}
+        .orange-bg { background: #fff6e6;}
+        .red-bg { background: #fdeaea;}
+        .gray-bg { background: #f1f1f1;}
+        .cumulative { font-weight: bold;}
+    </style>
+</head>
+<body>
+<h1>나의 결제 · 포인트 내역</h1>
+<div class="user-select">
+    <label for="userIdSel">User ID 선택:</label>
+    <select id="userIdSel">
+        <option value="1">1번 (예: Alice)</option>
+        <option value="2">2번 (예: Bob)</option>
+        <option value="5">5번 (예: Guest)</option>
+    </select>
+</div>
+<div class="point-summary" id="currentPointDiv">
+    현재 포인트: <span id="currentPoint" class="green"></span> P
+</div>
+
+<div class="sec-title">실 결제 내역 (amount &gt; 0)</div>
+<table id="paymentTable">
+    <thead>
+    <tr>
+        <th>일자</th>
+        <th>결제금액</th>
+        <th>포인트변동</th>
+        <th>누적포인트</th>
+        <th>결제수단</th>
+        <th>상태</th>
+        <th>결제번호</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<div class="sec-title">포인트 내역 (포인트 사용/적립 등, amount = 0)</div>
+<table id="pointTable">
+    <thead>
+    <tr>
+        <th>일자</th>
+        <th>포인트변동</th>
+        <th>누적포인트</th>
+        <th>상태</th>
+        <th>비고</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    // UserId 변경시 자동 조회
+    const userIdSel = document.getElementById('userIdSel');
+    userIdSel.addEventListener('change', fetchAndDraw);
+    window.addEventListener('DOMContentLoaded', fetchAndDraw);
+
+    function fetchAndDraw() {
+        const userId = userIdSel.value;
+        fetch(`/api/payment/history?userId=${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('currentPoint').textContent = data.currentPoint.toLocaleString();
+
+                // 결제내역(amount > 0)
+                const paymentRows = data.paymentList.map(e => {
+                    const colorClass = e.statusColor + ' label ' + (e.statusColor + '-bg');
+                    // 실패(2)나 환불(3)이면 변동은 무조건 '-'
+                    const pointDisplay = (e.paymentStatusCodeId === 1)
+                        ? signed(e.point) + 'P'
+                        : '-';
+                    return `<tr>
+                            <td>${dateStr(e.createdAt)}</td>
+                            <td>${e.amount ? e.amount.toLocaleString() + '원' : '-'}</td>
+                            <td>${pointDisplay}</td>
+                            <td class="cumulative">${e.cumulativePoint.toLocaleString()}P</td>
+                            <td>${e.method || '-'}</td>
+                            <td><span class="${colorClass}">${statusLabel(e.paymentStatusCodeId)}</span></td>
+                            <td>${e.impUid || e.merchantUid || '-'}</td>
+                        </tr>`;
+                }).join('');
+                document.querySelector('#paymentTable tbody').innerHTML = paymentRows || '<tr><td colspan="7" class="gray">내역 없음</td></tr>';
+
+                // 포인트내역(amount == 0)
+                const pointRows = data.pointList.map(e => {
+                    const colorClass = e.statusColor + ' label ' + (e.statusColor + '-bg');
+                    // 실패(2)나 환불(3)이면 변동은 무조건 '-'
+                    const pointDisplay = (e.paymentStatusCodeId === 1)
+                        ? signed(e.point) + 'P'
+                        : '-';
+                    return `<tr>
+                            <td>${dateStr(e.createdAt)}</td>
+                            <td>${pointDisplay}</td>
+                            <td class="cumulative">${e.cumulativePoint.toLocaleString()}P</td>
+                            <td><span class="${colorClass}">${statusLabel(e.paymentStatusCodeId)}</span></td>
+                            <td>${e.merchantUid ? e.merchantUid : '-'}</td>
+                        </tr>`;
+                }).join('');
+                document.querySelector('#pointTable tbody').innerHTML = pointRows || '<tr><td colspan="5" class="gray">내역 없음</td></tr>';
+            });
+    }
+
+    function dateStr(dt) {
+        if (!dt) return '-';
+        const d = new Date(dt.replace(' ', 'T'));
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    function pad(n) { return n < 10 ? '0' + n : n; }
+    function signed(n) {
+        if (n == null) return '-';
+        return (n > 0 ? '+' : '') + n.toLocaleString();
+    }
+    function statusLabel(code) {
+        switch (code) {
+            case 1: return '성공';
+            case 2: return '실패';
+            case 3: return '환불';
+            default: return '기타';
+        }
+    }
+</script>
+</body>
+</html>

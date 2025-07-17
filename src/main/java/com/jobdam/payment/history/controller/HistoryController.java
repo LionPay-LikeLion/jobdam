@@ -1,12 +1,10 @@
 package com.jobdam.payment.history.controller;
 
-import com.jobdam.payment.history.dto.PaymentHistoryResponseDto;
+import com.jobdam.payment.history.dto.HistoryResponseDto;
 import com.jobdam.payment.history.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment/history")
@@ -16,9 +14,9 @@ public class HistoryController {
     private final HistoryService historyService;
 
     @GetMapping
-    public ResponseEntity<List<PaymentHistoryResponseDto>> getPaymentHistory(
+    public ResponseEntity<HistoryResponseDto> getPaymentHistory(
             @RequestParam("userId") Integer userId) {
-        List<PaymentHistoryResponseDto> history = historyService.getUserPaymentHistory(userId);
+        HistoryResponseDto history = historyService.getUserHistory(userId);
         return ResponseEntity.ok(history);
     }
 }
