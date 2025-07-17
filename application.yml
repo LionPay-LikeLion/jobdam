@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "jobdamoffice@gmail.com"
+    password: "omth fjns rsob xaer"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+jwt:
+  secret: MHByb2plY3Qwam9iZGFtMGZvcmV2ZXIwbGlrZWxpb24=
