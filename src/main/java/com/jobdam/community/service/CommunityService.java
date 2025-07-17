@@ -18,6 +18,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.jobdam.community.dto.CommunityUpgradeRequestDto;
+import com.jobdam.community.entity.CommunitySubscription;
+import com.jobdam.payment.entity.Payment;
+import com.jobdam.payment.repository.PaymentRepository;
+import com.jobdam.community.repository.CommunitySubscriptionRepository;
+
+
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
@@ -26,6 +33,8 @@ public class CommunityService {
     private final UserRepository userRepository;
     private final SubscriptionLevelCodeRepository subscriptionLevelCodeRepository;
     private final CommunityMemberRepository communityMemberRepository;
+    private final PaymentRepository paymentRepository;
+    private final CommunitySubscriptionRepository communitySubscriptionRepository;
 
 
     @Transactional
@@ -111,8 +120,92 @@ public class CommunityService {
                 )
                 .collect(Collectors.toList());
     }
+    @Transactional
+    public void upgradeCommunityToPremium(Integer userId, CommunityUpgradeRequestDto dto) {
+        Community community = communityRepository.findById(dto.getCommunityId())
+                .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
+
+        if (!community.getUserId().equals(userId)) {
+            throw new RuntimeException("커뮤니티 생성자만 업그레이드할 수 있습니다.");
+        }
+        if (community.getSubscriptionLevelCodeId() == 2) {
+            throw new RuntimeException("이미 프리미엄 커뮤니티입니다.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        int price = dto.getPlanType().equalsIgnoreCase("YEARLY") ? 100000 : 10000;
+
+        if (user.getPoint() < price) {
+            throw new RuntimeException("포인트가 부족합니다.");
+        }
+
+        // 1. 포인트 차감
+        user.setPoint(user.getPoint() - price);
+        userRepository.save(user);
+
+        // 2. 커뮤니티 구독 정보 저장 (프리미엄)
+        CommunitySubscription subscription = new CommunitySubscription();
+        subscription.setCommunityId(community.getCommunityId());
+        subscription.setSubscriptionLevelCodeId(2); // PREMIUM
+        subscription.setPaidPoint(price);
+        subscription.setStartDate(LocalDateTime.now());
+
+        // 종료일 계산
+        if (dto.getPlanType().equalsIgnoreCase("YEARLY")) {
+            subscription.setEndDate(LocalDateTime.now().plusYears(1));
+        } else {
+            subscription.setEndDate(LocalDateTime.now().plusMonths(1));
+        }
+
+        subscription.setSubscriptionStatusCodeId(1); // ACTIVE
+        communitySubscriptionRepository.save(subscription);
+
+        // 3. 커뮤니티 등급 업데이트
+        community.setSubscriptionLevelCodeId(2); // PREMIUM
+        community.setMaxMember(100); // 프리미엄 한도 반영
+        communityRepository.save(community);
+
+        // 4. 결제 기록 (포인트 차감 로그)
+        Payment payment = new Payment();
+        payment.setUserId(userId);
+        payment.setPoint(-price);
+        payment.setPaymentTypeCodeId(4); // COMMUNITY_GRADE_UPGRADE
+        payment.setPaymentStatusCodeId(1); // SUCCESS
+        payment.setMethod("POINT");
+        payment.setCreatedAt(LocalDateTime.now());
+
+        paymentRepository.save(payment);
+    }
 
 
+    @Transactional
+    public void joinCommunity(Integer userId, Integer communityId) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
+
+        if (community.getCurrentMember() >= community.getMaxMember()) {
+            throw new RuntimeException("가입 인원이 가득 찼습니다.");
+        }
+
+        if (communityMemberRepository.existsByUserIdAndCommunityId(userId, communityId)) {
+            throw new RuntimeException("이미 가입한 커뮤니티입니다.");
+        }
+
+        CommunityMember member = CommunityMember.builder()
+                .communityId(communityId)
+                .userId(userId)
+                .joinedAt(LocalDateTime.now())
+                .paidPoint(0)
+                .communityMemberRoleCodeId(2) // 일반 멤버
+                .build();
+
+        communityMemberRepository.save(member);
+
+        community.setCurrentMember(community.getCurrentMember() + 1);
+        communityRepository.save(community);
+    }
 
 
 
