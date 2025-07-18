@@ -8,6 +8,6 @@ public class CommunityCreateRequestDto {
     private String description;
     private Integer userId;
     private Integer enterPoint;
-    private Integer maxMember;
+    //private Integer maxMember;
 }
 

@@ -48,15 +48,13 @@ public class CommunityService {
         }
 
         Community community = new Community();
-
         community.setName(dto.getName());
         community.setDescription(dto.getDescription());
         community.setSubscriptionLevelCodeId(1);
         community.setUserId(dto.getUserId());
         community.setEnterPoint(dto.getEnterPoint());
-        community.setMaxMember(dto.getMaxMember());
         community.setCurrentMember(1);
-
+        community.setMaxMember(30);
 
         communityRepository.save(community);
 
@@ -64,8 +62,8 @@ public class CommunityService {
                 .communityId(community.getCommunityId())
                 .userId(dto.getUserId())
                 .joinedAt(LocalDateTime.now())
-                .paidPoint(0) // 만든 사람은 입장 포인트 없음
-                .communityMemberRoleCodeId(1) // 1번이 관리자라면
+                .paidPoint(0)
+                .communityMemberRoleCodeId(1) // 운영자
                 .build();
 
         communityMemberRepository.save(member);
@@ -73,53 +71,7 @@ public class CommunityService {
         return community.getCommunityId();
     }
 
-    @Transactional
-    public List<CommunityListResponseDto> getAllCommunities() {
 
-        List<Community> communities = communityRepository.findAllByOrderByCurrentMemberDesc();
-
-        return communities.stream()
-                .map(c -> CommunityListResponseDto.builder()
-                        .communityId(c.getCommunityId())
-                        .name(c.getName())
-                        .description(c.getDescription())
-                        .subscriptionLevelCode(
-                                subscriptionLevelCodeRepository.findById(c.getSubscriptionLevelCodeId())
-                                        .map(SubscriptionLevelCode::getCode)
-                                        .orElse(null)
-                        )
-                        .ownerNickname(c.getUser().getNickname())
-                        .maxMember(c.getMaxMember())
-                        .currentMember(c.getCurrentMember())
-                        .enterPoint(c.getEnterPoint())
-                        .build()
-                )
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<CommunityListResponseDto> getCommunitiesByUserId(Integer userId) {
-
-        List<Community> communities = communityRepository.findByUserId(userId); // 커스텀 쿼리 필요
-
-        return communities.stream()
-                .map(c -> CommunityListResponseDto.builder()
-                        .communityId(c.getCommunityId())
-                        .name(c.getName())
-                        .description(c.getDescription())
-                        .subscriptionLevelCode(
-                                subscriptionLevelCodeRepository.findById(c.getSubscriptionLevelCodeId())
-                                        .map(SubscriptionLevelCode::getCode)
-                                        .orElse(null)
-                        )
-                        .ownerNickname(c.getUser().getNickname())
-                        .maxMember(c.getMaxMember())
-                        .currentMember(c.getCurrentMember())
-                        .enterPoint(c.getEnterPoint())
-                        .build()
-                )
-                .collect(Collectors.toList());
-    }
     @Transactional
     public void upgradeCommunityToPremium(Integer userId, CommunityUpgradeRequestDto dto) {
         Community community = communityRepository.findById(dto.getCommunityId())
@@ -207,7 +159,52 @@ public class CommunityService {
         communityRepository.save(community);
     }
 
+    @Transactional
+    public List<CommunityListResponseDto> getAllCommunities() {
 
+        List<Community> communities = communityRepository.findAllByOrderBySubscriptionLevelCodeIdDescCurrentMemberDesc();
+
+        return communities.stream()
+                .map(c -> CommunityListResponseDto.builder()
+                        .communityId(c.getCommunityId())
+                        .name(c.getName())
+                        .description(c.getDescription())
+                        .subscriptionLevelCode(
+                                subscriptionLevelCodeRepository.findById(c.getSubscriptionLevelCodeId())
+                                        .map(SubscriptionLevelCode::getCode)
+                                        .orElse(null)
+                        )
+                        .ownerNickname(c.getUser().getNickname())
+                        .maxMember(c.getMaxMember())
+                        .currentMember(c.getCurrentMember())
+                        .enterPoint(c.getEnterPoint())
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityListResponseDto> getCommunitiesByUserId(Integer userId) {
+        List<Community> communities = communityRepository.findByUserId(userId);
+
+        return communities.stream()
+                .map(c -> CommunityListResponseDto.builder()
+                        .communityId(c.getCommunityId())
+                        .name(c.getName())
+                        .description(c.getDescription())
+                        .subscriptionLevelCode(
+                                subscriptionLevelCodeRepository.findById(c.getSubscriptionLevelCodeId())
+                                        .map(SubscriptionLevelCode::getCode)
+                                        .orElse(null)
+                        )
+                        .ownerNickname(c.getUser().getNickname())
+                        .maxMember(c.getMaxMember())
+                        .currentMember(c.getCurrentMember())
+                        .enterPoint(c.getEnterPoint())
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
 
 }
 
