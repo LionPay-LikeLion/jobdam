@@ -7,14 +7,14 @@ import java.time.LocalDateTime;
 @Getter
 public class SnsMessageBoxResponseDto {
 
-    private Long opponentUserId;
+    private Integer opponentUserId;
     private String opponentNickname;
     private String opponentProfileImageUrl;
     private String lastMessageContent;
     private LocalDateTime lastMessageCreatedAt;
 
     public SnsMessageBoxResponseDto(
-            Long opponentUserId,
+            Integer opponentUserId,
             String opponentNickname,
             String opponentProfileImageUrl,
             String lastMessageContent,

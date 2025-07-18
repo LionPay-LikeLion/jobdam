@@ -31,8 +31,7 @@ public class CommunityBoardController {
     @PostMapping
     public ResponseEntity<String> createBoard(
             @PathVariable Integer communityId,
-            @RequestBody CommunityBoardCreateRequestDto dto,
-            @AuthenticationPrincipal CustomUserDetails user
+            @RequestBody CommunityBoardCreateRequestDto dto
     ) {
         communityBoardService.createBoard(communityId, dto);
         return ResponseEntity.ok("게시판이 생성되었습니다.");

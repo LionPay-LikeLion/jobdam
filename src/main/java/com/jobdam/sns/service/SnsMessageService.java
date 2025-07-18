@@ -9,5 +9,5 @@ public interface SnsMessageService {
 
     void sendMessage(Integer senderId, SnsMessageRequestDto requestDto);
 
-    List<SnsMessageResponseDto> getConversation(Long userId1, Long userId2);
+    List<SnsMessageResponseDto> getConversation(Integer userId1, Integer userId2);
 }

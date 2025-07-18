@@ -1,9 +1,11 @@
 package com.jobdam.sns.controller;
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.sns.dto.SnsCommentRequestDto;
 import com.jobdam.sns.dto.SnsCommentResponseDto;
 import com.jobdam.sns.service.SnsCommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,20 +24,20 @@ public class SnsCommentController {
 
     @PostMapping
     public Integer createComment(@RequestBody SnsCommentRequestDto requestDto,
-                                 @RequestParam Integer userId) {
-        return snsCommentService.createComment(requestDto, userId);
+                                 @AuthenticationPrincipal CustomUserDetails user) {
+        return snsCommentService.createComment(requestDto, user.getUserId());
     }
 
     @PutMapping("/{commentId}")
     public void updateComment(@PathVariable Integer commentId,
                               @RequestBody SnsCommentRequestDto requestDto,
-                              @RequestParam Integer userId) {
-        snsCommentService.updateComment(commentId, requestDto, userId);
+                              @AuthenticationPrincipal CustomUserDetails user) {
+        snsCommentService.updateComment(commentId, requestDto, user.getUserId());
     }
 
     @DeleteMapping("/{commentId}")
     public void deleteComment(@PathVariable Integer commentId,
-                              @RequestParam Integer userId) {
-        snsCommentService.deleteComment(commentId, userId);
+                              @AuthenticationPrincipal CustomUserDetails user) {
+        snsCommentService.deleteComment(commentId, user.getUserId());
     }
 }

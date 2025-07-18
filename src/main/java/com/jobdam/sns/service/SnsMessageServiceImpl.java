@@ -29,7 +29,7 @@ public class SnsMessageServiceImpl implements SnsMessageService {
     }
 
     @Override
-    public List<SnsMessageResponseDto> getConversation(Long userId1, Long userId2) {
+    public List<SnsMessageResponseDto> getConversation(Integer userId1, Integer userId2) {
         return snsMessageRepository
                 .findMessagesWithSenderFetched(userId1, userId2, userId2, userId1)
                 .stream()
