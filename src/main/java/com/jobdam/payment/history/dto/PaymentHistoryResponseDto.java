@@ -1,38 +1,54 @@
+// src/main/java/com/jobdam/payment/history/dto/PaymentHistoryResponseDto.java
 package com.jobdam.payment.history.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
 import com.jobdam.payment.entity.Payment;
+import com.jobdam.payment.entity.PaymentStatusCode;
+import lombok.Builder;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class PaymentHistoryResponseDto {
     private Long paymentId;
-    private String merchantUid;
-    private String impUid;
+    private Integer point;        // <-- 반드시 실제 값이 채워져야 함
     private Integer amount;
-    private Integer point;
     private Integer paymentTypeCodeId;
     private Integer paymentStatusCodeId;
+    private String paymentStatus; // "SUCCESS", "FAILED", "CANCELLED"
     private String method;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+    private String impUid;
+    private String merchantUid;
+    private Integer cumulativePoint;
+    private String statusColor;
+    private String statusLabel;   // 상태 라벨 (성공/실패/취소 등)
 
-    public static PaymentHistoryResponseDto fromEntity(Payment payment) {
+    public static PaymentHistoryResponseDto fromEntity(Payment payment, Integer cumulativePoint) {
+        PaymentStatusCode statusEnum = PaymentStatusCode.fromCode(payment.getPaymentStatusCodeId());
         return PaymentHistoryResponseDto.builder()
                 .paymentId(payment.getPaymentId())
-                .merchantUid(payment.getMerchantUid())
-                .impUid(payment.getImpUid())
-                .amount(payment.getAmount())
                 .point(payment.getPoint())
+                .amount(payment.getAmount())
                 .paymentTypeCodeId(payment.getPaymentTypeCodeId())
-                .paymentStatusCodeId(payment.getPaymentStatusCodeId())
+                .paymentStatus(statusEnum.name())  // Enum의 "SUCCESS" 등 문자열
+                .statusColor(getStatusColor(statusEnum))
                 .method(payment.getMethod())
                 .createdAt(payment.getCreatedAt())
+                .impUid(payment.getImpUid())
+                .merchantUid(payment.getMerchantUid())
+                .cumulativePoint(cumulativePoint)
                 .build();
+    }
+
+    private static String getStatusColor(PaymentStatusCode code) {
+        switch (code) {
+            case SUCCESS:   return "green";
+            case FAILED:    return "orange";
+            case CANCELLED: return "red";
+            default:        return "gray";
+        }
     }
 }
