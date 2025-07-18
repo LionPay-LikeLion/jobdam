@@ -1,6 +1,4 @@
-server:
-  # port: 8081
-  forward-headers-strategy: framework
+server: { port: 8081, forward-headers-strategy: framework }
 
 spring:
   jackson:
