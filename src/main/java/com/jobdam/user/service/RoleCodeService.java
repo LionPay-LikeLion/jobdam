@@ -1,6 +1,6 @@
 package com.jobdam.user.service;
 
-import com.jobdam.user.repository.RoleCodeRepository;
+import com.jobdam.code.repository.RoleCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

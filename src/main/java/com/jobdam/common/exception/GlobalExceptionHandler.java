@@ -32,3 +32,4 @@ public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeExcepti
     error.put("message", ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 }
+}

@@ -1,5 +1,6 @@
 package com.jobdam.common.filter;
 
+import com.jobdam.code.repository.RoleCodeRepository;
 import com.jobdam.common.util.JwtProvider;
 import com.jobdam.user.service.RoleCodeService;
 import io.jsonwebtoken.Claims;
@@ -24,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final RoleCodeService roleCodeService;
+    private final RoleCodeRepository roleCodeRepository;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -52,9 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtProvider.parseClaims(token);
                 String email = claims.getSubject();
-                Integer roleId = Integer.valueOf(claims.get("role").toString());
+                String roleName = "ROLE_" + claims.get("role").toString(); // 문자열 직접 꺼냄
 
-                String roleName = "ROLE_" + roleCodeService.getRoleNameById(roleId);
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(roleName);
 
                 UsernamePasswordAuthenticationToken authentication =
@@ -67,6 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
             }
+
         }
 
         filterChain.doFilter(request, response);

@@ -1,5 +1,5 @@
 server:
-  #port: 8081
+  port: 8081
   forward-headers-strategy: framework
 
 spring:
@@ -18,6 +18,21 @@ spring:
       ddl-auto: none  # in development (auto table create/modify)
       # ddl-auto: none  # in operation (manual sql management)
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "jobdamoffice@gmail.com"
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secret: ${JWT_SECRET}
+
 
 management:
   endpoints:

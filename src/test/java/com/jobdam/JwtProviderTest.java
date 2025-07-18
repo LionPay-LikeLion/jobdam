@@ -42,17 +42,17 @@ public class JwtProviderTest {
 
     @Test
     void createToken_shouldReturnValidToken() {
-        String token = jwtProvider.createToken("user@example.com", 1);
+        String token = jwtProvider.createToken(1,"user@example.com", "USER");
         assertNotNull(token);
     }
 
     @Test
     void parseClaims_shouldReturnClaimsWithCorrectSubjectAndRole() {
-        String token = jwtProvider.createToken("user@example.com", 2);
+        String token = jwtProvider.createToken(1,"user@example.com", "USER");
         Claims claims = jwtProvider.parseClaims(token);
 
         assertEquals("user@example.com", claims.getSubject());
-        assertEquals(2, claims.get("role", Integer.class));
+        assertEquals("USER", claims.get("role", String.class));
     }
 
     @Test

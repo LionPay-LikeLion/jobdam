@@ -25,26 +25,24 @@ public class JwtProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(String email, int roleCodeId) {
-        System.out.println(">>>>> [JwtProvider] JWT 생성 시작 - 이메일: " + email + ", roleId: " + roleCodeId);
+    public String createToken(Integer userId, String email, String roleCode) {
+        System.out.println(">>>>> [JwtProvider] JWT 생성 시작 - userId: " + userId + ", 이메일: " + email + ", role: " + roleCode);
 
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put("role", roleCodeId);
+        claims.put("userId", userId);
+        claims.put("role", roleCode);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidTime);
 
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
-
-        System.out.println(">>>>> [JwtProvider] JWT 생성 완료: " + token);
-
-        return token;
     }
+
 
     public Claims parseClaims(String token) {
         return Jwts.parserBuilder()

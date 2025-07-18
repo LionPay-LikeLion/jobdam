@@ -59,7 +59,11 @@ public class AuthService {
         }
         System.out.println(">>>>> [Service] 로그인 처리 중, 이메일: " + request.getEmail());
 
-        String token = jwtProvider.createToken(user.getEmail(), user.getRoleCodeId());
+        String token = jwtProvider.createToken(
+                user.getUserId(),
+                user.getEmail(),
+                user.getRoleCode().getCode()
+        );
         System.out.println(">>>>> [Service] 생성된 JWT 토큰: " + token);
 
         return token;

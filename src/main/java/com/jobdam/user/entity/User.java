@@ -1,9 +1,10 @@
 package com.jobdam.user.entity;
 
+import com.jobdam.code.entity.RoleCode;
+import com.jobdam.code.entity.SubscriptionLevelCode;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor; // Recommended for JPA
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 import com.jobdam.code.entity.MemberTypeCode;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Setter
 @NoArgsConstructor // Explicitly include this
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "user")
 public class User {
 
@@ -61,6 +64,15 @@ public class User {
         updatable = false
     )
     private MemberTypeCode memberTypeCode;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_level_code_id", insertable = false, updatable = false)
+    private SubscriptionLevelCode subscriptionLevelCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_code_id", insertable = false, updatable = false)
+    private RoleCode roleCode;
 
     /*
     // Re-enable this if you want relation to post
