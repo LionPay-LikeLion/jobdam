@@ -22,7 +22,7 @@ public class SnsMessage {
     private Long receiverId;
 
     @Column(name = "sender_user_id", nullable = false)
-    private Long senderId;
+    private Integer senderId;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;

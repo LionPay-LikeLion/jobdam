@@ -5,7 +5,8 @@ import com.jobdam.sns.dto.SnsMessageResponseDto;
 import com.jobdam.sns.service.SnsMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.jobdam.common.util.CustomUserDetails;
 import java.util.List;
 
 @RestController
@@ -16,8 +17,8 @@ public class SnsMessageController {
     private final SnsMessageService snsMessageService;
 
     @PostMapping
-    public void sendMessage(@RequestParam Long senderId, @RequestBody SnsMessageRequestDto requestDto) {
-        snsMessageService.sendMessage(senderId, requestDto);
+    public void sendMessage(@AuthenticationPrincipal CustomUserDetails user, @RequestBody SnsMessageRequestDto requestDto) {
+        snsMessageService.sendMessage(user.getUserId(), requestDto);
     }
 
     @GetMapping("/conversation")

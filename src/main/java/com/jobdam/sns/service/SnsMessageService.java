@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface SnsMessageService {
 
-    void sendMessage(Long senderId, SnsMessageRequestDto requestDto);
+    void sendMessage(Integer senderId, SnsMessageRequestDto requestDto);
 
     List<SnsMessageResponseDto> getConversation(Long userId1, Long userId2);
 }
