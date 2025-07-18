@@ -1,6 +1,7 @@
 // src/main/java/com/jobdam/payment/controller/PaymentController.java
 package com.jobdam.payment.controller;
 
+import com.jobdam.payment.dto.CancelPaymentRequestDto;
 import com.jobdam.payment.dto.PaymentRequestDto;
 import com.jobdam.payment.dto.PaymentResponseDto;
 import com.jobdam.payment.service.PaymentService;
@@ -31,8 +32,8 @@ public class PaymentController {
     }
 
     @PostMapping("/cancel")
-    public PaymentResponseDto cancelPayment(@RequestParam String merchantUid) {
-        return paymentService.cancelPayment(merchantUid);
+    public PaymentResponseDto cancelPayment(@RequestBody CancelPaymentRequestDto dto) {
+        return paymentService.cancelPayment(dto);
     }
 
     @GetMapping("/user/{userId}")
