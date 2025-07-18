@@ -9,11 +9,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173") // 리액트 주소
+        registry.addMapping("/**") // <-- more inclusive than "/*"
+                .allowedOrigins(
+                        "http://localhost:5173",        // for local dev
+                        "https://jobdams.online"        // for production
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-                .allowedHeaders("*")
+                .allowedHeaders("*")                  // allow all headers
                 .allowCredentials(true);
     }
-
 }
