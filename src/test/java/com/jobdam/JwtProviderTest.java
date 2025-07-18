@@ -32,13 +32,15 @@ public class JwtProviderTest {
     private String createExpiredToken() {
         Key key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(encodedSecretKey));
         return io.jsonwebtoken.Jwts.builder()
-                .setSubject("expired@example.com")
-                .claim("role", 1)
+                .setSubject("1")
+                .claim("email", "expired@example.com")
+                .claim("role", "USER")
                 .setIssuedAt(new Date(System.currentTimeMillis() - 100000))
-                .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                .setExpiration(new Date(System.currentTimeMillis() - 1000)) // 이미 만료된 시간
                 .signWith(key)
                 .compact();
     }
+
 
     @Test
     void createToken_shouldReturnValidToken() {
@@ -48,12 +50,14 @@ public class JwtProviderTest {
 
     @Test
     void parseClaims_shouldReturnClaimsWithCorrectSubjectAndRole() {
-        String token = jwtProvider.createToken(1,"user@example.com", "USER");
+        String token = jwtProvider.createToken(1, "user@example.com", "USER");
         Claims claims = jwtProvider.parseClaims(token);
 
-        assertEquals("user@example.com", claims.getSubject());
-        assertEquals("USER", claims.get("role", String.class));
+        assertEquals("1", claims.getSubject()); // sub가 userId로 변경됨
+        assertEquals("user@example.com", claims.get("email", String.class)); // email은 claim으로
+        assertEquals("USER", claims.get("role", String.class)); // role claim도 그대로 확인
     }
+
 
     @Test
     void parseClaims_shouldThrowExceptionForExpiredToken() {

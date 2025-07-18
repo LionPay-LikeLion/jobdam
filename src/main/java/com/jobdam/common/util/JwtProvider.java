@@ -28,17 +28,17 @@ public class JwtProvider {
     public String createToken(Integer userId, String email, String roleCode) {
         System.out.println(">>>>> [JwtProvider] JWT 생성 시작 - userId: " + userId + ", 이메일: " + email + ", role: " + roleCode);
 
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("userId", userId);
-        claims.put("role", roleCode);
+        Date now = new Date(); // 현재 시간
+        Date validity = new Date(now.getTime() + accessTokenValidTime); // 만료 시간
 
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + accessTokenValidTime);
+        Claims claims = Jwts.claims().setSubject(userId.toString()); // sub를 userId로 설정
+        claims.put("email", email);
+        claims.put("role", roleCode);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(validity)
+                .setIssuedAt(now)         // iat
+                .setExpiration(validity)  // exp
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
