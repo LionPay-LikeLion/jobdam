@@ -4,8 +4,10 @@ package com.jobdam.payment.history.controller;
 import com.jobdam.payment.history.dto.HistoryResponseDto;
 import com.jobdam.payment.history.dto.PaymentHistoryResponseDto;
 import com.jobdam.payment.history.service.HistoryService;
+import com.jobdam.common.util.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,24 +21,24 @@ public class HistoryController {
 
     @GetMapping
     public ResponseEntity<HistoryResponseDto> getPaymentHistory(
-            @RequestParam("userId") Integer userId) {
-        HistoryResponseDto history = historyService.getUserHistory(userId);
+            @AuthenticationPrincipal CustomUserDetails User) {
+        HistoryResponseDto history = historyService.getUserHistory(User.getUserId());
         return ResponseEntity.ok(history);
     }
 
     // 결제(실 결제) 내역만
     @GetMapping("/payments")
     public ResponseEntity<List<PaymentHistoryResponseDto>> getPaymentList(
-            @RequestParam("userId") Integer userId) {
-        List<PaymentHistoryResponseDto> list = historyService.getPaymentList(userId);
+            @AuthenticationPrincipal CustomUserDetails User) {
+        List<PaymentHistoryResponseDto> list = historyService.getPaymentList(User.getUserId());
         return ResponseEntity.ok(list);
     }
 
     // 포인트 내역만 (적립/사용/충전 등)
     @GetMapping("/points")
     public ResponseEntity<List<PaymentHistoryResponseDto>> getPointList(
-            @RequestParam("userId") Integer userId) {
-        List<PaymentHistoryResponseDto> list = historyService.getPointList(userId);
+            @AuthenticationPrincipal CustomUserDetails User) {
+        List<PaymentHistoryResponseDto> list = historyService.getPointList(User.getUserId());
         return ResponseEntity.ok(list);
     }
 }
