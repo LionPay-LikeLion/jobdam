@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 · 포인트 내역</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f6f8fa; margin: 0; padding: 40px;}
+        h1 { font-size: 2em; margin-bottom: 10px;}
+        .point-summary { background: #fff; padding: 16px 24px; border-radius: 12px; box-shadow: 0 2px 10px #0001; font-size: 1.3em; margin-bottom: 24px; }
+        .user-select { margin-bottom: 24px; }
+        input[type="number"] { font-size: 1em; padding: 6px 16px; border-radius: 6px; border: 1px solid #ccc; width: 100px;}
+        .tabs { display: flex; margin-bottom: 12px;}
+        .tab-btn { padding: 12px 24px; cursor: pointer; border: none; background: #e5e7eb; border-radius: 12px 12px 0 0; font-size: 1.1em; margin-right: 4px; font-weight: bold;}
+        .tab-btn.active { background: #fff; border-bottom: 2px solid #2ec700; color: #2ec700;}
+        table { width: 100%; border-collapse: collapse; margin-bottom: 32px; background: #fff; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 12px 8px; text-align: center; }
+        th { background: #f0f3f6; }
+        tr:nth-child(even) { background: #f7faff; }
+        .green { color: #2ec700; font-weight: bold;}
+        .orange { color: #ff9800; font-weight: bold;}
+        .red { color: #e53935; font-weight: bold;}
+        .gray { color: #999; }
+        .label { padding: 4px 10px; border-radius: 12px; font-size: 0.9em;}
+        .green-bg { background: #e9fae8;}
+        .orange-bg { background: #fff6e6;}
+        .red-bg { background: #fdeaea;}
+        .gray-bg { background: #f1f1f1;}
+        .cumulative { font-weight: bold;}
+        .hidden { display: none;}
+        .refund-btn { padding: 6px 14px; font-size: 1em; border: none; border-radius: 7px; background: #e8e8e8; color: #222; cursor: pointer; margin-left: 6px;}
+        .refund-btn[disabled] { background: #f4f4f4; color: #aaa; cursor: not-allowed; border: 1px solid #ddd;}
+        .sec-title { font-size: 1.15em; margin: 24px 0 6px 0;}
+    </style>
+</head>
+<body>
+<h1>나의 결제 · 포인트 내역</h1>
+<div class="user-select">
+    <label for="userIdInput">User ID 직접 입력:</label>
+    <input type="number" id="userIdInput" value="1" min="1" max="100">
+    <button onclick="fetchAll()">조회</button>
+</div>
+<div class="point-summary" id="currentPointDiv">
+    현재 포인트: <span id="currentPoint" class="green"></span> P
+</div>
+
+<!-- 탭 버튼 -->
+<div class="tabs">
+    <button class="tab-btn active" id="tab-payment" onclick="switchTab('payment')">실 결제 내역</button>
+    <button class="tab-btn" id="tab-point" onclick="switchTab('point')">포인트 내역</button>
+</div>
+
+<!-- 결제 내역 테이블 -->
+<div id="paymentTab">
+    <table id="paymentTable">
+        <thead>
+        <tr>
+            <th>일자</th>
+            <th>결제금액</th>
+            <th>포인트변동</th>
+            <th>누적포인트</th>
+            <th>결제수단</th>
+            <th>상태</th>
+            <th>결제번호</th>
+            <th>환불</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- 포인트 내역 테이블 -->
+<div id="pointTab" class="hidden">
+    <table id="pointTable">
+        <thead>
+        <tr>
+            <th>일자</th>
+            <th>포인트변동</th>
+            <th>누적포인트</th>
+            <th>상태</th>
+            <th>비고</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    let paymentList = [];
+    let currentUserId = 1;
+
+    document.getElementById('userIdInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') fetchAll();
+    });
+    window.addEventListener('DOMContentLoaded', fetchAll);
+
+    function switchTab(tab) {
+        document.getElementById('tab-payment').classList.toggle('active', tab === 'payment');
+        document.getElementById('tab-point').classList.toggle('active', tab === 'point');
+        document.getElementById('paymentTab').classList.toggle('hidden', tab !== 'payment');
+        document.getElementById('pointTab').classList.toggle('hidden', tab !== 'point');
+    }
+
+    function fetchAll() {
+        currentUserId = document.getElementById('userIdInput').value || 1;
+        // 현재 포인트(통합 history API)
+        fetch(`/api/payment/history?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('currentPoint').textContent = (data.currentPoint || 0).toLocaleString();
+            });
+        // 결제 내역
+        fetch(`/api/payment/history/payments?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(list => {
+                paymentList = list;
+                drawPaymentTable(list);
+            });
+        // 포인트 내역
+        fetch(`/api/payment/history/points?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(list => drawPointTable(list));
+    }
+
+    // 결제내역: 환불 버튼 활성/비활성 로직
+    function canRefund(e) {
+        // 서버가 내려주는 canRefund, refundReason이 가장 BEST
+        // 없으면 기본적으로 아래와 같이 판단
+        if (e.paymentStatus !== "SUCCESS") return false;
+        if (e.canRefund === false) return false;
+        return true;
+    }
+    function refundDisabledReason(e) {
+        if (e.paymentStatus === "CANCELLED") return "이미 환불된 결제입니다";
+        if (e.paymentStatus === "FAILED") return "실패한 결제는 환불 불가";
+        if (e.canRefund === false && e.refundReason) return e.refundReason;
+        if (e.canRefund === false) return "포인트 부족, 환불 불가";
+        return "";
+    }
+
+    function drawPaymentTable(list) {
+        let cumulative = 0;
+        const rows = list.map((e, idx) => {
+            // 환불이면 포인트 음수
+            let pointVal = (e.paymentStatus === "SUCCESS")  ? e.point
+                : (e.paymentStatus === "CANCELLED") ? -Math.abs(e.point)
+                    : 0;
+            if (e.paymentStatus === "SUCCESS" || e.paymentStatus === "CANCELLED") {
+                cumulative += pointVal;
+            }
+            const colorClass = e.statusColor + ' label ' + (e.statusColor + '-bg');
+            const pointDisplay =
+                (e.paymentStatus === "SUCCESS" || e.paymentStatus === "CANCELLED")
+                    ? signed(pointVal) + 'P' : '-';
+
+            // 환불 버튼 (disabled + 타이틀 툴팁)
+            let refundBtn = `<button class="refund-btn" onclick="requestRefund(${idx})"
+                ${canRefund(e) ? '' : 'disabled title="' + refundDisabledReason(e) + '"'}>
+                환불</button>`;
+
+            return `<tr>
+                <td>${dateStr(e.createdAt)}</td>
+                <td>${e.amount ? e.amount.toLocaleString() + '원' : '-'}</td>
+                <td>${pointDisplay}</td>
+                <td class="cumulative">${cumulative.toLocaleString()}P</td>
+                <td>${e.method || '-'}</td>
+                <td><span class="${colorClass}">${statusLabel(e.paymentStatus)}</span></td>
+                <td>${e.impUid || e.merchantUid || '-'}</td>
+                <td>${refundBtn}</td>
+            </tr>`;
+        }).join('');
+        document.querySelector('#paymentTable tbody').innerHTML = rows || `<tr><td colspan="8" class="gray">내역 없음</td></tr>`;
+    }
+
+    function drawPointTable(list) {
+        let cumulative = 0;
+        const rows = list.map(e => {
+            let pointVal = (e.paymentStatus === "SUCCESS")  ? e.point
+                : (e.paymentStatus === "CANCELLED") ? -Math.abs(e.point)
+                    : 0;
+            if (e.paymentStatus === "SUCCESS" || e.paymentStatus === "CANCELLED") {
+                cumulative += pointVal;
+            }
+            const colorClass = e.statusColor + ' label ' + (e.statusColor + '-bg');
+            const pointDisplay =
+                (e.paymentStatus === "SUCCESS" || e.paymentStatus === "CANCELLED")
+                    ? signed(pointVal) + 'P' : '-';
+            return `<tr>
+                <td>${dateStr(e.createdAt)}</td>
+                <td>${pointDisplay}</td>
+                <td class="cumulative">${cumulative.toLocaleString()}P</td>
+                <td><span class="${colorClass}">${statusLabel(e.paymentStatus)}</span></td>
+                <td>${e.merchantUid ? e.merchantUid : '-'}</td>
+            </tr>`;
+        }).join('');
+        document.querySelector('#pointTable tbody').innerHTML = rows || `<tr><td colspan="5" class="gray">내역 없음</td></tr>`;
+    }
+
+    // 환불 요청 AJAX (서버에 cancelPayment POST)
+    function requestRefund(idx) {
+        const e = paymentList[idx];
+        if (!confirm(`정말 환불하시겠습니까?\n결제번호: ${e.merchantUid || e.impUid}`)) return;
+
+        // 서버 cancel API에 POST
+        fetch('/api/payment/cancel', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                merchantUid: e.merchantUid,
+                impUid: e.impUid,
+                amount: e.amount,
+                userId: currentUserId,      // userId 반드시 같이 전달
+                reason: "사용자 요청 환불"
+            })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("환불 실패");
+                return res.json();
+            })
+            .then(resp => {
+                alert('환불 완료!');
+                fetchAll(); // 환불 후 즉시 갱신
+            })
+            .catch(err => {
+                alert('환불 불가: ' + err.message);
+            });
+    }
+
+    function dateStr(dt) {
+        if (!dt) return '-';
+        const d = new Date(dt.replace(' ', 'T'));
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    function pad(n) { return n < 10 ? '0' + n : n; }
+    function signed(n) {
+        if (n == null || n === 0) return '0';
+        return (n > 0 ? '+' : '') + n.toLocaleString();
+    }
+    function statusLabel(s) {
+        switch (s) {
+            case "SUCCESS":   return '성공';
+            case "FAILED":    return '실패';
+            case "CANCELLED": return '환불';
+            default:          return '기타';
+        }
+    }
+</script>
+</body>
+</html>
