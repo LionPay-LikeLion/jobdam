@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/api/payment")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping
+    @PostMapping("/create")
     public PaymentResponseDto createPayment(@AuthenticationPrincipal CustomUserDetails user,
                                             @RequestBody PaymentRequestDto dto) {
         return paymentService.createPayment(dto, user.getUserId());
