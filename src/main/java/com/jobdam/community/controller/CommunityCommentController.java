@@ -1,12 +1,14 @@
 package com.jobdam.community.controller;
 
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.community.dto.CommunityCommentCreateRequestDto;
 import com.jobdam.community.dto.CommunityCommentListResponseDto;
 import com.jobdam.community.dto.CommunityPostListResponseDto;
 import com.jobdam.community.service.CommunityCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +24,9 @@ public class CommunityCommentController {
     public ResponseEntity<Integer> createComment(
             @PathVariable Integer postId,
             @RequestBody CommunityCommentCreateRequestDto dto,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        Integer commentId = communityCommentService.createComment(dto, postId, userId);
+        Integer commentId = communityCommentService.createComment(dto, postId, user.getUserId());
         return ResponseEntity.ok(commentId);
     }
 
@@ -36,11 +38,11 @@ public class CommunityCommentController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/user")
-    public ResponseEntity<List<CommunityCommentListResponseDto>> getCommentsByUserId(
-            @RequestParam Integer userId
+    @GetMapping("/my")
+    public ResponseEntity<List<CommunityCommentListResponseDto>> getMyComments(
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        List<CommunityCommentListResponseDto> dto = communityCommentService.getCommentsByUserId(userId);
+        List<CommunityCommentListResponseDto> dto = communityCommentService.getCommentsByUserId(user.getUserId());
         return ResponseEntity.ok(dto);
     }
 
@@ -48,18 +50,18 @@ public class CommunityCommentController {
     public ResponseEntity<Void> updateComment(
             @PathVariable Integer commentId,
             @RequestBody CommunityCommentCreateRequestDto dto,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        communityCommentService.updateComment(dto, commentId, userId);
+        communityCommentService.updateComment(dto, commentId, user.getUserId());
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Integer commentId,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        communityCommentService.softDeleteComment(commentId, userId);
+        communityCommentService.softDeleteComment(commentId, user.getUserId());
         return ResponseEntity.ok().build();
     }
 

@@ -31,11 +31,11 @@ public class PaymentService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public PaymentResponseDto createPayment(PaymentRequestDto dto) {
+    public PaymentResponseDto createPayment(PaymentRequestDto dto, Integer userId) {
         ChargeOption option = ChargeOption.fromCode(dto.getChargeOption());
         String merchantUid = "order-" + UUID.randomUUID();  // 여기서만 UID 생성
         Payment payment = Payment.builder()
-                .userId(dto.getUserId())
+                .userId(userId)
                 .point(option.getPoint())
                 .amount(option.getAmount())
                 .paymentTypeCodeId(dto.getPaymentTypeCodeId())
@@ -63,12 +63,12 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponseDto cancelPayment(CancelPaymentRequestDto dto) {
+    public PaymentResponseDto cancelPayment(CancelPaymentRequestDto dto, Integer userId) {
         // 1. 결제건 찾기 및 검증
         Payment payment = paymentRepository.findByMerchantUid(dto.getMerchantUid())
                 .orElseThrow(() -> new IllegalArgumentException("결제 내역 없음"));
 
-        if (!payment.getUserId().equals(dto.getUserId())) {
+        if (!payment.getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인 결제만 환불 가능");
         }
         if (payment.getPaymentStatusCodeId() != PaymentStatusCode.SUCCESS.getCode()) {
@@ -76,7 +76,7 @@ public class PaymentService {
         }
 
         // 2. 포인트 잔액 검증 (당시 적립 포인트 이하, 그리고 현재 보유 포인트 이상인지)
-        int userPoint = pointService.getUserPoint(dto.getUserId());
+        int userPoint = pointService.getUserPoint(userId);
         int refundPoint = payment.getPoint();
         if (refundPoint > 0 && userPoint < refundPoint) {
             throw new IllegalArgumentException("현재 포인트 부족, 환불 불가");
@@ -101,7 +101,7 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         if (refundPoint > 0) {
-            pointService.subtractPoint(dto.getUserId(), refundPoint);
+            pointService.subtractPoint(userId, refundPoint);
         }
 
         return toDto(payment);

@@ -5,9 +5,11 @@ import com.jobdam.admin.dto.MembertypeChangeProcessDto;
 import com.jobdam.admin.dto.MembertypeChangeRequestDto;
 import com.jobdam.admin.dto.MembertypeChangeResponseDto;
 import com.jobdam.admin.service.MembertypeChangeService;
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +24,10 @@ public class MembertypeChangeController {
     @PostMapping
     public ResponseEntity<Void> requestChange(
             @RequestBody MembertypeChangeRequestDto dto,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
 
-        membertypeChangeService.createRequest(userId, dto);
+        membertypeChangeService.createRequest(user.getUserId(), dto);
 
         return ResponseEntity.ok().build();
     }

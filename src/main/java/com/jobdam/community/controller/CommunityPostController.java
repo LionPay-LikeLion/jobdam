@@ -1,5 +1,6 @@
 package com.jobdam.community.controller;
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.community.dto.CommunityBoardCreateRequestDto;
 import com.jobdam.community.dto.CommunityPostCreateRequestDto;
 import com.jobdam.community.dto.CommunityPostListResponseDto;
@@ -7,6 +8,7 @@ import com.jobdam.community.dto.CommunityPostUpdateRequestDto;
 import com.jobdam.community.service.CommunityPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,9 +34,9 @@ public class CommunityPostController {
     public ResponseEntity<Integer> createPost(
             @PathVariable Integer boardId,
             @RequestBody CommunityPostCreateRequestDto dto,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        Integer postId = communityPostService.createPost(dto, boardId, userId);
+        Integer postId = communityPostService.createPost(dto, boardId, user.getUserId());
         return ResponseEntity.ok(postId);
     }
 
