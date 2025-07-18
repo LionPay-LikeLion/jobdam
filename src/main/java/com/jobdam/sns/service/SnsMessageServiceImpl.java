@@ -20,7 +20,7 @@ public class SnsMessageServiceImpl implements SnsMessageService {
     private final UserRepository userRepository;
 
     @Override
-    public void sendMessage(Long senderId, SnsMessageRequestDto requestDto) {
+    public void sendMessage(Integer senderId, SnsMessageRequestDto requestDto) {
         SnsMessage message = new SnsMessage();
         message.setSenderId(senderId);
         message.setReceiverId(requestDto.getReceiverId());
