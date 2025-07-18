@@ -18,9 +18,10 @@ import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PaymentRequestDto {
-    private Integer userId;
+
     private String chargeOption; // 프론트에서 amount/point 대신 옵션코드만 전달
     private String method;
     private String merchantUid;
     private Integer paymentTypeCodeId;
+
 }

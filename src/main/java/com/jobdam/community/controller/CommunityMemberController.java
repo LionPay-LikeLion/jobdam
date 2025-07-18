@@ -1,10 +1,12 @@
 package com.jobdam.community.controller;
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.community.dto.CommunityMemberListResponseDto;
 import com.jobdam.community.repository.CommunityMemberRepository;
 import com.jobdam.community.service.CommunityMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +22,9 @@ public class CommunityMemberController {
     @PostMapping("/{communityId}/members")
     public ResponseEntity<Void> joinCommunity(
             @PathVariable Integer communityId,
-            @RequestParam Integer userId) {
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        communityMemberService.joinCommunity(userId, communityId);
+        communityMemberService.joinCommunity(user.getUserId(), communityId);
 
         return ResponseEntity.ok().build();
     }
@@ -39,9 +41,9 @@ public class CommunityMemberController {
     @GetMapping("/{communityId}/members/{userId}/exist")
 
     public ResponseEntity<Boolean> checkMembership(@PathVariable Integer communityId,
-                                                   @PathVariable Integer userId) {
+                                                   @AuthenticationPrincipal CustomUserDetails user) {
 
-        boolean exists = communityMemberRepository.existsByCommunityIdAndUserId(communityId, userId);
+        boolean exists = communityMemberRepository.existsByCommunityIdAndUserId(communityId, user.getUserId());
 
         return ResponseEntity.ok(exists);
     }

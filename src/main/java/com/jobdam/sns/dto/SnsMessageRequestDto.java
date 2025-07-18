@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SnsMessageRequestDto {
-    private Long receiverId;
+    private Integer receiverId;
     private String content;
 }

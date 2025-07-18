@@ -3,7 +3,6 @@ package com.jobdam.community.service;
 import com.jobdam.community.dto.CommunityMemberListResponseDto;
 import com.jobdam.community.entity.Community;
 import com.jobdam.community.entity.CommunityMember;
-import com.jobdam.community.repository.CommunityCommentRepository;
 import com.jobdam.community.repository.CommunityMemberRepository;
 import com.jobdam.community.repository.CommunityRepository;
 import com.jobdam.user.entity.User;

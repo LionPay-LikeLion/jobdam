@@ -16,13 +16,13 @@ public class SnsMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
-    private Long messageId;
+    private Integer messageId;
 
     @Column(name = "receiver_user_id", nullable = false)
-    private Long receiverId;
+    private Integer receiverId;
 
     @Column(name = "sender_user_id", nullable = false)
-    private Long senderId;
+    private Integer senderId;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;

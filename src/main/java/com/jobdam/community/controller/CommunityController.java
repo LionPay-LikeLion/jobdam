@@ -1,11 +1,13 @@
 package com.jobdam.community.controller;
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.community.dto.CommunityCreateRequestDto;
 import com.jobdam.community.dto.CommunityListResponseDto;
 import com.jobdam.community.service.CommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,17 +24,19 @@ public class CommunityController {
 
     @PostMapping("/upgrade")
     public ResponseEntity<String> upgradeCommunity(
-            @RequestParam Integer userId,
+            @AuthenticationPrincipal CustomUserDetails user,
             @RequestBody CommunityUpgradeRequestDto dto) {
 
-        communityService.upgradeCommunityToPremium(userId, dto);
+        communityService.upgradeCommunityToPremium(user.getUserId(), dto);
         return ResponseEntity.ok("커뮤니티가 프리미엄으로 업그레이드되었습니다.");
     }
 
     @PostMapping
-    public ResponseEntity<Integer> createCommunity(@RequestBody CommunityCreateRequestDto dto) {
-
-        Integer id = communityService.createCommunity(dto);
+    public ResponseEntity<Integer> createCommunity(
+            @RequestBody CommunityCreateRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Integer id = communityService.createCommunity(dto, user.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
@@ -44,16 +48,16 @@ public class CommunityController {
 
     @GetMapping("/my")
     public ResponseEntity<List<CommunityListResponseDto>> getMyCommunities(
-            @RequestParam Integer userId) {
-        List<CommunityListResponseDto> communities = communityService.getCommunitiesByUserId(userId);
+            @AuthenticationPrincipal CustomUserDetails user) {
+        List<CommunityListResponseDto> communities = communityService.getCommunitiesByUserId(user.getUserId());
         return ResponseEntity.ok(communities);
     }
 
     @PostMapping("/{communityId}/join")
     public ResponseEntity<String> joinCommunity(
             @PathVariable Integer communityId,
-            @RequestParam Integer userId) {
-        communityService.joinCommunity(userId, communityId);
+            @AuthenticationPrincipal CustomUserDetails user) {
+        communityService.joinCommunity(user.getUserId(), communityId);
         return ResponseEntity.ok("커뮤니티에 가입되었습니다.");
     }
 

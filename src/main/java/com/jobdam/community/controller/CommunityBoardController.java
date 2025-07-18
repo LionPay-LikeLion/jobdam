@@ -1,11 +1,13 @@
 package com.jobdam.community.controller;
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.community.dto.CommunityBoardCreateRequestDto;
 import com.jobdam.community.dto.CommunityBoardListResponseDto;
 import com.jobdam.community.dto.CommunityListResponseDto;
 import com.jobdam.community.service.CommunityBoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
