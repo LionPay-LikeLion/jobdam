@@ -14,7 +14,7 @@ public class SnsMessageBoxServiceImpl implements SnsMessageBoxService {
     private final SnsMessageBoxRepository snsMessageBoxRepository;
 
     @Override
-    public List<SnsMessageBoxResponseDto> getMessageBoxes(Long userId) {
+    public List<SnsMessageBoxResponseDto> getMessageBoxes(Integer userId) {
         return snsMessageBoxRepository.findMessageBoxesByUserId(userId);
     }
 }

@@ -38,7 +38,7 @@ public class CommunityService {
 
 
     @Transactional
-    public Integer createCommunity(CommunityCreateRequestDto dto) {
+    public Integer createCommunity(CommunityCreateRequestDto dto, Integer userId) {
 
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
@@ -51,7 +51,7 @@ public class CommunityService {
         community.setName(dto.getName());
         community.setDescription(dto.getDescription());
         community.setSubscriptionLevelCodeId(1);
-        community.setUserId(dto.getUserId());
+        community.setUserId(userId);
         community.setEnterPoint(dto.getEnterPoint());
         community.setCurrentMember(1);
         community.setMaxMember(30);
@@ -60,7 +60,7 @@ public class CommunityService {
 
         CommunityMember member = CommunityMember.builder()
                 .communityId(community.getCommunityId())
-                .userId(dto.getUserId())
+                .userId(userId)
                 .joinedAt(LocalDateTime.now())
                 .paidPoint(0)
                 .communityMemberRoleCodeId(1) // 운영자

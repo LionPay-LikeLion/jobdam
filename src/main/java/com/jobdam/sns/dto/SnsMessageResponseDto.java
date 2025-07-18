@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class SnsMessageResponseDto {
-    private Long messageId;
+    private Integer messageId;
     private Integer senderId;
-    private Long receiverId;
+    private Integer receiverId;
     private String content;
     private LocalDateTime createdAt;
 

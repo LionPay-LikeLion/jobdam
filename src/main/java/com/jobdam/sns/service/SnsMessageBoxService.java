@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SnsMessageBoxService {
 
-    List<SnsMessageBoxResponseDto> getMessageBoxes(Long userId);
+    List<SnsMessageBoxResponseDto> getMessageBoxes(Integer userId);
 }

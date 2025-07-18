@@ -19,9 +19,9 @@ List<SnsMessage> findBySenderIdOrReceiverIdOrderByCreatedAtDesc(Long senderId, L
         ORDER BY m.createdAt
     """)
     List<SnsMessage> findMessagesWithSenderFetched(
-            @Param("senderId1") Long senderId1,
-            @Param("receiverId1") Long receiverId1,
-            @Param("senderId2") Long senderId2,
-            @Param("receiverId2") Long receiverId2
+            @Param("senderId1") Integer senderId1,
+            @Param("receiverId1") Integer receiverId1,
+            @Param("senderId2") Integer senderId2,
+            @Param("receiverId2") Integer receiverId2
     );
 }

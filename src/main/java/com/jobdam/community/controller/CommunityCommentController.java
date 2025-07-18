@@ -50,18 +50,18 @@ public class CommunityCommentController {
     public ResponseEntity<Void> updateComment(
             @PathVariable Integer commentId,
             @RequestBody CommunityCommentCreateRequestDto dto,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        communityCommentService.updateComment(dto, commentId, userId);
+        communityCommentService.updateComment(dto, commentId, user.getUserId());
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Integer commentId,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        communityCommentService.softDeleteComment(commentId, userId);
+        communityCommentService.softDeleteComment(commentId, user.getUserId());
         return ResponseEntity.ok().build();
     }
 

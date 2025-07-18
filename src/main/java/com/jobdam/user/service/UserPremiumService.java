@@ -27,8 +27,8 @@ public class UserPremiumService {
     private static final int PAYMENT_SUCCESS_ID = 1;             // 결제 상태: 성공
 
     @Transactional
-    public void upgradeToPremium(UserPremiumRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public void upgradeToPremium(UserPremiumRequest request, Integer userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
         int price = request.getPlanType().equalsIgnoreCase("YEARLY") ? 99000 : 9900;
@@ -46,7 +46,7 @@ public class UserPremiumService {
         LocalDateTime end = request.getPlanType().equalsIgnoreCase("YEARLY") ? now.plusYears(1) : now.plusMonths(1);
 
         UserSubscription subscription = new UserSubscription();
-        subscription.setUserId(user.getUserId());
+        subscription.setUserId(userId);
         subscription.setPaidPoint(price);
         subscription.setStartDate(now);
         subscription.setEndDate(end);
@@ -56,14 +56,14 @@ public class UserPremiumService {
 
         // 결제 내역 저장
         Payment payment = Payment.builder()
-                .userId(user.getUserId())
+                .userId(userId)
                 .point(-price)
                 .amount(0)
                 .paymentTypeCodeId(USER_GRADE_UPGRADE_ID)
                 .paymentStatusCodeId(PAYMENT_SUCCESS_ID)
                 .method("POINT")
                 .impUid("system-" + System.currentTimeMillis())
-                .merchantUid("upgrade-" + user.getUserId() + "-" + System.currentTimeMillis())
+                .merchantUid("upgrade-" + userId + "-" + System.currentTimeMillis())
                 .build();
         paymentRepository.save(payment);
     }

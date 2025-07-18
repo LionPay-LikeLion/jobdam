@@ -1,8 +1,10 @@
 package com.jobdam.sns.controller;
 
+import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.sns.dto.BookmarkResponseDto;
 import com.jobdam.sns.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,19 +18,19 @@ public class BookmarkController {
 
 
     @PostMapping
-    public void addBookmark(@RequestParam Integer userId, @RequestParam Integer postId) {
-        bookmarkService.addBookmark(userId, postId);
+    public void addBookmark(@AuthenticationPrincipal CustomUserDetails user, @RequestParam Integer postId) {
+        bookmarkService.addBookmark(user.getUserId(), postId);
     }
 
 
     @DeleteMapping
-    public void removeBookmark(@RequestParam Integer userId, @RequestParam Integer postId) {
-        bookmarkService.removeBookmark(userId, postId);
+    public void removeBookmark(@AuthenticationPrincipal CustomUserDetails user, @RequestParam Integer postId) {
+        bookmarkService.removeBookmark(user.getUserId(), postId);
     }
 
 
     @GetMapping
-    public List<BookmarkResponseDto> getBookmarks(@RequestParam Integer userId) {
-        return bookmarkService.getBookmarksByUser(userId);
+    public List<BookmarkResponseDto> getBookmarks(@AuthenticationPrincipal CustomUserDetails user) {
+        return bookmarkService.getBookmarksByUser(user.getUserId());
     }
 }

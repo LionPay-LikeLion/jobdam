@@ -23,9 +23,9 @@ public class SnsMessageController {
 
     @GetMapping("/conversation")
     public List<SnsMessageResponseDto> getConversation(
-            @RequestParam Long userId1,
-            @RequestParam Long userId2
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam Integer userId
     ) {
-        return snsMessageService.getConversation(userId1, userId2);
+        return snsMessageService.getConversation(user.getUserId(), userId);
     }
 }

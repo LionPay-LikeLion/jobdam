@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SnsMessageBoxRepository extends JpaRepository<SnsMessage, Long> {
+public interface SnsMessageBoxRepository extends JpaRepository<SnsMessage, Integer> {
 
     @Query("""
     SELECT new com.jobdam.sns.dto.SnsMessageBoxResponseDto(
-        CAST(CASE WHEN m.senderId = :userId THEN m.receiver.userId ELSE m.sender.userId END AS long),
+        CASE WHEN m.senderId = :userId THEN m.receiver.userId ELSE m.sender.userId END,
         CASE WHEN m.senderId = :userId THEN m.receiver.nickname ELSE m.sender.nickname END,
         CASE WHEN m.senderId = :userId THEN m.receiver.profileImageUrl ELSE m.sender.profileImageUrl END,
         m.content,
@@ -32,6 +32,6 @@ public interface SnsMessageBoxRepository extends JpaRepository<SnsMessage, Long>
     AND (m.senderId = :userId OR m.receiverId = :userId)
     ORDER BY m.createdAt DESC
 """)
-    List<SnsMessageBoxResponseDto> findMessageBoxesByUserId(@Param("userId") Long userId);
+    List<SnsMessageBoxResponseDto> findMessageBoxesByUserId(@Param("userId") Integer userId);
 
 }

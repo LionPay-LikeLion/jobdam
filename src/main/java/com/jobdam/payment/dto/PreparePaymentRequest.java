@@ -5,7 +5,7 @@ import lombok.*;
 
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class PreparePaymentRequest {
-    private Integer userId;               // 사용자 ID
+             // 사용자 ID
     private Integer amount;               // 결제 금액
     private Integer point;                // 적립 포인트
     private Integer paymentTypeCodeId;    // 결제 타입 코드
