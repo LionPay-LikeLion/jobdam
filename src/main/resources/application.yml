@@ -8,6 +8,23 @@ spring:
       WRITE_DATES_AS_TIMESTAMPS: false
   config:
     import: optional:file:.env[.properties]
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: {baseUrl}/api/oauth/google/callback
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -32,7 +49,6 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-
 
 management:
   endpoints:
