@@ -13,5 +13,6 @@ public class CommunityListResponseDto {
     private Integer maxMember;
     private Integer currentMember;
     private Integer enterPoint;
+    private String profileImageUrl;
 
 }
