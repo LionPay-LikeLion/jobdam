@@ -44,6 +44,10 @@ public class Community {
     @Column(name = "max_member", columnDefinition = "INT DEFAULT 30")
     private Integer maxMember;
 
+    @Column(name = "profile_image_url", length = 255)
+    private String profileImageUrl;
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_level_code_id", insertable = false, updatable = false)
     private SubscriptionLevelCode subscriptionLevelCode;

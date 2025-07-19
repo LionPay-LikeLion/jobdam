@@ -7,15 +7,16 @@ import com.jobdam.user.entity.User;
 
 public class SnsPostMapper {
 
-    public static SnsPost toEntity(SnsPostRequestDto dto, Integer userId) {
+    public static SnsPost toEntity(SnsPostRequestDto dto, Integer userId, String imageUrl, String attachmentUrl) {
         SnsPost post = new SnsPost();
         post.setUserId(userId);
         post.setTitle(dto.getTitle());
         post.setContent(dto.getContent());
-        post.setImageUrl(dto.getImageUrl());
-        post.setAttachmentUrl(dto.getAttachmentUrl());
+        post.setImageUrl(imageUrl); // 저장된 파일 경로/URL
+        post.setAttachmentUrl(attachmentUrl); // 저장된 파일 경로/URL
         return post;
     }
+
 
 
     public static SnsPostResponseDto toDto(SnsPost post, User user, int likeCount, int commentCount, boolean isLiked, boolean isBookmarked) {

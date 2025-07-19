@@ -14,8 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.jobdam.community.dto.CommunityUpgradeRequestDto;
@@ -47,6 +50,26 @@ public class CommunityService {
             throw new RuntimeException("구독 레벨이 2여야 커뮤니티를 생성할 수 있습니다.");
         }
 
+        String imageUrl = null;
+        if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + "community" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + dto.getProfileImage().getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            try {
+                dto.getProfileImage().transferTo(dest);
+                imageUrl = "/uploads/community/" + userId + "/" + fileName;
+            } catch (IOException | IllegalStateException e) {
+                // 예외 로그 출력 (실제 운영환경에서는 log.error로 남기기)
+                e.printStackTrace();
+                // 사용자에게 알릴 수 있도록 런타임 예외 던지기
+                throw new RuntimeException("프로필 이미지 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
+
+
         Community community = new Community();
         community.setName(dto.getName());
         community.setDescription(dto.getDescription());
@@ -55,6 +78,7 @@ public class CommunityService {
         community.setEnterPoint(dto.getEnterPoint());
         community.setCurrentMember(1);
         community.setMaxMember(30);
+        community.setProfileImageUrl(imageUrl);
 
         communityRepository.save(community);
 
@@ -178,6 +202,7 @@ public class CommunityService {
                         .maxMember(c.getMaxMember())
                         .currentMember(c.getCurrentMember())
                         .enterPoint(c.getEnterPoint())
+                        .profileImageUrl(c.getProfileImageUrl())
                         .build()
                 )
                 .collect(Collectors.toList());
@@ -201,6 +226,7 @@ public class CommunityService {
                         .maxMember(c.getMaxMember())
                         .currentMember(c.getCurrentMember())
                         .enterPoint(c.getEnterPoint())
+                        .profileImageUrl(c.getProfileImageUrl())
                         .build()
                 )
                 .collect(Collectors.toList());

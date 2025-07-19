@@ -8,6 +8,7 @@ import com.jobdam.community.service.CommunityBoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,9 +32,11 @@ public class CommunityBoardController {
     @PostMapping
     public ResponseEntity<String> createBoard(
             @PathVariable Integer communityId,
-            @RequestBody CommunityBoardCreateRequestDto dto
+            @RequestBody CommunityBoardCreateRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails user // 현재 로그인한 사용자 정보
     ) {
-        communityBoardService.createBoard(communityId, dto);
+
+        communityBoardService.createBoard(communityId, dto, user.getUserId());
         return ResponseEntity.ok("게시판이 생성되었습니다.");
     }
 

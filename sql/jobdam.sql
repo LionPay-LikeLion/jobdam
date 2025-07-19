@@ -204,6 +204,7 @@ CREATE TABLE community (
   enter_point INT DEFAULT 0,
   max_member INT DEFAULT 30,
   current_member INT DEFAULT 0,
+  profile_image_url VARCHAR(255),
   FOREIGN KEY (user_id) REFERENCES user(user_id),
   FOREIGN KEY (subscription_level_code_id) REFERENCES subscription_level_code(subscription_level_code_id)
 );
