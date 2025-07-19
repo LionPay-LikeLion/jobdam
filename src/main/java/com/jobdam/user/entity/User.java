@@ -74,6 +74,15 @@ public class User {
     @JoinColumn(name = "role_code_id", insertable = false, updatable = false)
     private RoleCode roleCode;
 
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "provider_type")
+    private String providerType;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+
     /*
     // Re-enable this if you want relation to post
     @ManyToOne(fetch = FetchType.LAZY)
