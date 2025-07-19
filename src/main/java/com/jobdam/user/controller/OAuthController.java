@@ -8,6 +8,9 @@ import com.jobdam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.jobdam.common.util.GoogleVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/oauth")
@@ -17,18 +20,29 @@ public class OAuthController {
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final RoleCodeRepository roleCodeRepository;
+    private final GoogleVerifier googleVerifier;
 
     @PostMapping("/login")
-    public ResponseEntity<String> oauthLogin(@RequestBody OAuthRegisterRequestDto requestDto) {
-        // register if new, or fetch existing
+    public ResponseEntity<String> oauthLogin(@RequestBody Map<String, String> body) {
+        String credential = body.get("credential");
+        GoogleIdToken.Payload payload = googleVerifier.verify(credential);
+        if (payload == null || !Boolean.TRUE.equals(payload.getEmailVerified())) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+
+        OAuthRegisterRequestDto requestDto = new OAuthRegisterRequestDto();
+        requestDto.setEmail(email);
+        requestDto.setNickname(name);
+
         User user = userService.findOrRegisterOAuthUser(requestDto);
 
-        // get role code string safely
         String roleCode = roleCodeRepository.findById(user.getRoleCodeId())
                 .map(role -> role.getCode())
-                .orElse("USER");  // fallback default
+                .orElse("USER");
 
-        // issue JWT
         String token = jwtProvider.createToken(
                 user.getUserId(),
                 user.getEmail(),

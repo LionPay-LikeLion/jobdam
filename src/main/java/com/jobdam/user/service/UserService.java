@@ -1,4 +1,7 @@
+
 package com.jobdam.user.service;
+
+import com.jobdam.user.dto.OAuthRegisterRequestDto;
 
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.code.entity.RoleCode;
@@ -6,7 +9,6 @@ import com.jobdam.code.entity.SubscriptionLevelCode;
 import com.jobdam.code.repository.MemberTypeCodeRepository;
 import com.jobdam.code.repository.RoleCodeRepository;
 import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
-import com.jobdam.user.dto.OAuthRegisterRequestDto;
 import com.jobdam.user.dto.UserProfileDto;
 import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
@@ -17,8 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,40 +59,6 @@ public class UserService {
         );
     }
 
-    public User registerOAuthUser(OAuthRegisterRequestDto dto) {
-        // does user already exist (providerId or by email as fallback)
-        Optional<User> existing = userRepository.findByProviderId(dto.getProviderId());
-        if (existing.isPresent()) {
-            return existing.get();  // or throw if you want to enforce single registration
-        }
-
-        // build new user
-        User newUser = User.builder()
-                .providerId(dto.getProviderId())
-                .providerType(dto.getProviderType())
-                .email(dto.getEmail())
-                .emailVerified(dto.getEmailVerified())
-                .nickname(dto.getNickname())
-                .profileImageUrl(dto.getProfileImageUrl())
-                .subscriptionLevelCodeId(1)     // default
-                .roleCodeId(1)                  // default
-                .memberTypeCodeId(1)            // default
-                .point(0)
-                .build();
-
-        // save and return
-        return userRepository.save(newUser);
-    }
-
-    public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
-        if (!dto.getEmailVerified()) {
-            throw new IllegalStateException("Google has not verified your email. Please verify it before logging in.");
-        }
-        // Check if user exists by provider ID
-        Optional<User> existingUser = userRepository.findByProviderId(dto.getProviderId());
-        return existingUser.orElseGet(() -> registerOAuthUser(dto));
-    }
-
     public void updateProfileImage(Integer userId, MultipartFile image) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
@@ -119,4 +85,25 @@ public class UserService {
         userRepository.save(user);
     }
 
+}
+
+public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
+    return userRepository.findByEmail(dto.getEmail())
+            .orElseGet(() -> {
+                User newUser = User.builder()
+                        .email(dto.getEmail())
+                        .nickname(dto.getNickname())
+                        .roleCodeId(roleCodeRepository.findByCode("USER")
+                                .map(RoleCode::getRoleCodeId)
+                                .orElse(1)) // fallback role id
+                        .subscriptionLevelCodeId(subscriptionLevelCodeRepository.findByCode("BASIC")
+                                .map(SubscriptionLevelCode::getSubscriptionLevelCodeId)
+                                .orElse(1)) // fallback subscription id
+                        .memberTypeCodeId(memberTypeCodeRepository.findByCode("GOOGLE")
+                                .map(MemberTypeCode::getMemberTypeCodeId)
+                                .orElse(1)) // fallback member type
+                        .point(0)
+                        .build();
+                return userRepository.save(newUser);
+            });
 }

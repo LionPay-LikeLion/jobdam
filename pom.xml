@@ -120,7 +120,7 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.11.5</version>
 			<scope>runtime</scope>
-    </dependency>
+    	</dependency>
     
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -129,6 +129,17 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>2.5.0</version> <!-- or the latest available -->
+		</dependency>
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-jackson2</artifactId>
+			<version>1.43.3</version>
 		</dependency>
 	</dependencies>
 
@@ -144,6 +155,9 @@
 							<artifactId>lombok</artifactId>
 						</path>
 					</annotationProcessorPaths>
+					<source>21</source>
+					<target>21</target>
+					<compilerArgs>--enable-preview</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
