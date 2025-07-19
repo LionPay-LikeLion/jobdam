@@ -15,8 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,25 @@ public class MembertypeChangeService {
         MemberTypeCode requestedType = memberTypeCodeRepository.findByCode(dto.getRequestedMemberTypeCode())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 요청 회원 타입 코드"));
 
+        String fileUrl = null;
+        if (dto.getAttachment() != null && !dto.getAttachment().isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + dto.getAttachment().getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+
+            try {
+                dto.getAttachment().transferTo(dest);
+                fileUrl = "/uploads/" + userId + "/" + fileName;
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+                throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
+
+
 
         MembertypeChange entity = MembertypeChange.builder()
 
@@ -55,7 +77,7 @@ public class MembertypeChangeService {
                 .reason(dto.getReason())
                 .content(dto.getContent())
                 .referenceLink(dto.getReferenceLink())
-                .attachmentUrl(dto.getAttachmentUrl())
+                .attachmentUrl(fileUrl)
                 .requestedAt(LocalDateTime.now())
                 .processedAt(null)
                 .requestAdminStatusCodeId(1)

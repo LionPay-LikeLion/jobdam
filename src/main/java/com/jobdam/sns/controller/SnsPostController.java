@@ -75,14 +75,14 @@ public class SnsPostController {
 
     // 게시글 작성
     @PostMapping
-    public Integer createPost(@RequestBody SnsPostRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails user) {
+    public Integer createPost(@ModelAttribute SnsPostRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails user) {
         return snsPostService.createPost(requestDto, user.getUserId());
     }
 
     // 게시글 수정
     @PutMapping("/{postId}")
     public void updatePost(@PathVariable Integer postId,
-                           @RequestBody SnsPostRequestDto requestDto,
+                           @ModelAttribute SnsPostRequestDto requestDto,
                            @AuthenticationPrincipal CustomUserDetails user) {
         snsPostService.updatePost(postId, requestDto, user.getUserId());
     }
