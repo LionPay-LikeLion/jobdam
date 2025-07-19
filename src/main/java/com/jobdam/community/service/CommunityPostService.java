@@ -4,16 +4,14 @@ import com.jobdam.code.entity.BoardTypeCode;
 import com.jobdam.code.entity.PostTypeCode;
 import com.jobdam.code.repository.BoardTypeCodeRepository;
 import com.jobdam.code.repository.PostTypeCodeRepository;
-import com.jobdam.community.dto.CommunityBoardCreateRequestDto;
-import com.jobdam.community.dto.CommunityPostCreateRequestDto;
-import com.jobdam.community.dto.CommunityPostListResponseDto;
-import com.jobdam.community.dto.CommunityPostUpdateRequestDto;
+import com.jobdam.community.dto.*;
 import com.jobdam.community.entity.Community;
 import com.jobdam.community.entity.CommunityBoard;
 import com.jobdam.community.entity.CommunityPost;
 import com.jobdam.community.repository.CommunityBoardRepository;
 import com.jobdam.community.repository.CommunityCommentRepository;
 import com.jobdam.community.repository.CommunityPostRepository;
+import com.jobdam.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -137,6 +135,30 @@ public class CommunityPostService {
         post.setUpdatedAt(LocalDateTime.now());
 
     }
+
+    public CommunityPostDetailResponseDto getPostDetail(Integer postId) {
+        CommunityPost post = communityPostRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        User author = post.getUser();
+
+        // 댓글 개수 카운트 (댓글 Repository 사용)
+        int commentCount = communityCommentRepository.countByCommunityPostId(postId);
+
+        return CommunityPostDetailResponseDto.builder()
+                .postId(post.getCommunityPostId())
+                .boardId(post.getCommunityBoardId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .userNickname(author.getNickname())
+                .userProfileImageUrl(author.getProfileImageUrl())
+                .createdAt(post.getCreatedAt())
+                .commentCount(commentCount) // 이렇게 주입!
+                .viewCount(post.getViewCount())
+                .postTypeCode(post.getPostTypeCode().getCode())
+                .build();
+    }
+
 
 
 }

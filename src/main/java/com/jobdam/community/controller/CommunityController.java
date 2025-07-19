@@ -33,7 +33,7 @@ public class CommunityController {
 
     @PostMapping
     public ResponseEntity<Integer> createCommunity(
-            @RequestBody CommunityCreateRequestDto dto,
+            @ModelAttribute CommunityCreateRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         Integer id = communityService.createCommunity(dto, user.getUserId());

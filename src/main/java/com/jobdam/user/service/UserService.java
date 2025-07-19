@@ -12,6 +12,11 @@ import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 
 import java.util.Optional;
 
@@ -87,4 +92,31 @@ public class UserService {
         Optional<User> existingUser = userRepository.findByProviderId(dto.getProviderId());
         return existingUser.orElseGet(() -> registerOAuthUser(dto));
     }
+
+    public void updateProfileImage(Integer userId, MultipartFile image) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        String fileUrl = null;
+        if (image != null && !image.isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + "user" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+
+            try {
+                image.transferTo(dest);
+                fileUrl = "/uploads/user/" + userId + "/" + fileName;
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+                throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
+
+        user.setProfileImageUrl(fileUrl);
+        userRepository.save(user);
+    }
+
 }

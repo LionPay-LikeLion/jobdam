@@ -23,7 +23,7 @@ public class MembertypeChangeController {
 
     @PostMapping
     public ResponseEntity<Void> requestChange(
-            @RequestBody MembertypeChangeRequestDto dto,
+            @ModelAttribute MembertypeChangeRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
 

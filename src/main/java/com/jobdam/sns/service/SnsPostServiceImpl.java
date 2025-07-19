@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.jobdam.common.exception.LimitExceededException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -171,12 +174,48 @@ public class SnsPostServiceImpl implements SnsPostService {
             }
         }
 
+
+        String imageUrl = null;
+        if (requestDto.getImage() != null && !requestDto.getImage().isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + requestDto.getImage().getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            try {
+                requestDto.getImage().transferTo(dest);
+                imageUrl = "/uploads/" + userId + "/" + fileName;
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+                throw new RuntimeException("이미지 파일 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
+
+        String attachmentUrl = null;
+        if (requestDto.getAttachment() != null && !requestDto.getAttachment().isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + requestDto.getAttachment().getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            try {
+                requestDto.getAttachment().transferTo(dest);
+                attachmentUrl = "/uploads/" + userId + "/" + fileName;
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+                throw new RuntimeException("첨부파일 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
+
+
         SnsPost post = new SnsPost();
         post.setUserId(userId);
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
-        post.setImageUrl(requestDto.getImageUrl());
-        post.setAttachmentUrl(requestDto.getAttachmentUrl());
+        post.setImageUrl(imageUrl);        // 저장된 경로
+        post.setAttachmentUrl(attachmentUrl); // 저장된 경로
 
         snsPostRepository.save(post);
         return post.getSnsPostId();
@@ -195,9 +234,41 @@ public class SnsPostServiceImpl implements SnsPostService {
 
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
-        post.setImageUrl(requestDto.getImageUrl());
-        post.setAttachmentUrl(requestDto.getAttachmentUrl());
+
+        // ---- 이미지 파일 새로 업로드 시 ----
+        if (requestDto.getImage() != null && !requestDto.getImage().isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + requestDto.getImage().getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            try {
+                requestDto.getImage().transferTo(dest);
+                post.setImageUrl("/uploads/" + userId + "/" + fileName);
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+                throw new RuntimeException("이미지 파일 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
+
+        if (requestDto.getAttachment() != null && !requestDto.getAttachment().isEmpty()) {
+            String rootPath = System.getProperty("user.dir");
+            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + requestDto.getAttachment().getOriginalFilename();
+            File dest = new File(uploadDir + fileName);
+            try {
+                requestDto.getAttachment().transferTo(dest);
+                post.setAttachmentUrl("/uploads/" + userId + "/" + fileName);
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+                throw new RuntimeException("첨부파일 업로드 중 오류가 발생했습니다.", e);
+            }
+        }
     }
+
 
     @Override
     @Transactional

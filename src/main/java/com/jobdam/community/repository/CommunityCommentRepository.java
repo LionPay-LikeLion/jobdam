@@ -13,4 +13,5 @@ public interface CommunityCommentRepository extends JpaRepository<CommunityComme
 
     List<CommunityComment> findByCommunityPostIdOrderByCreatedAtAsc(Integer postId);
 
+
 }
