@@ -147,7 +147,7 @@ INSERT INTO report_type_code (code, name) VALUES
 CREATE TABLE user (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NULL,
   nickname VARCHAR(50) NOT NULL,
   subscription_level_code_id INT NOT NULL DEFAULT 1,  
   role_code_id INT NOT NULL DEFAULT 1,
