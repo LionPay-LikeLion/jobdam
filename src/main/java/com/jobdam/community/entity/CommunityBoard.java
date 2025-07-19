@@ -1,5 +1,6 @@
 package com.jobdam.community.entity;
 
+import com.jobdam.code.entity.BoardStatusCode;
 import com.jobdam.code.entity.BoardTypeCode;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,6 +59,10 @@ public class CommunityBoard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_type_code_id", insertable = false, updatable = false)
     private BoardTypeCode boardTypeCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_status_code_id", insertable = false, updatable = false)
+    private BoardStatusCode boardStatusCode;
 
 
 

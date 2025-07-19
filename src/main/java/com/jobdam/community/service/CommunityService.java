@@ -1,10 +1,11 @@
 package com.jobdam.community.service;
 
 import com.jobdam.code.entity.SubscriptionLevelCode;
-import com.jobdam.community.dto.CommunityCreateRequestDto;
-import com.jobdam.community.dto.CommunityListResponseDto;
+import com.jobdam.community.dto.*;
 import com.jobdam.community.entity.Community;
+import com.jobdam.community.entity.CommunityBoard;
 import com.jobdam.community.entity.CommunityMember;
+import com.jobdam.community.repository.CommunityBoardRepository;
 import com.jobdam.community.repository.CommunityMemberRepository;
 import com.jobdam.community.repository.CommunityRepository;
 import com.jobdam.user.entity.User;
@@ -21,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.jobdam.community.dto.CommunityUpgradeRequestDto;
 import com.jobdam.community.entity.CommunitySubscription;
 import com.jobdam.payment.entity.Payment;
 import com.jobdam.payment.repository.PaymentRepository;
@@ -38,7 +38,11 @@ public class CommunityService {
     private final CommunityMemberRepository communityMemberRepository;
     private final PaymentRepository paymentRepository;
     private final CommunitySubscriptionRepository communitySubscriptionRepository;
+    private final CommunityBoardRepository communityBoardRepository;
 
+
+    private static final int PAYMENT_TYPE_COMMUNITY_JOIN = 2;  // 커뮤니티 가입
+    private static final int PAYMENT_SUCCESS_ID = 1;
 
     @Transactional
     public Integer createCommunity(CommunityCreateRequestDto dto, Integer userId) {
@@ -158,6 +162,7 @@ public class CommunityService {
 
     @Transactional
     public void joinCommunity(Integer userId, Integer communityId) {
+
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
 
@@ -168,6 +173,32 @@ public class CommunityService {
         if (communityMemberRepository.existsByUserIdAndCommunityId(userId, communityId)) {
             throw new RuntimeException("이미 가입한 커뮤니티입니다.");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        int enterPoint = community.getEnterPoint() != null ? community.getEnterPoint() : 0;
+
+        // 포인트 차감 체크
+        if (user.getPoint() < enterPoint) {
+            throw new RuntimeException("포인트가 부족합니다.");
+        }
+
+        // 포인트 차감
+        user.setPoint(user.getPoint() - enterPoint);
+        userRepository.save(user);
+
+        Payment payment = Payment.builder()
+                .userId(userId)
+                .point(-enterPoint)
+                .amount(0)
+                .paymentTypeCodeId(PAYMENT_TYPE_COMMUNITY_JOIN) // 예: 6번 = COMMUNITY_JOIN
+                .paymentStatusCodeId(PAYMENT_SUCCESS_ID)       // 예: 1번 = SUCCESS
+                .method("POINT")
+                .impUid("system-" + System.currentTimeMillis())
+                .merchantUid("community-join-" + userId + "-" + System.currentTimeMillis())
+                .build();
+        paymentRepository.save(payment);
 
         CommunityMember member = CommunityMember.builder()
                 .communityId(communityId)
@@ -231,6 +262,50 @@ public class CommunityService {
                 )
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public CommunityDetailResponseDto getCommunityDetail(Integer communityId) {
+        // 1. 커뮤니티 기본 정보 조회
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
+
+        String ownerNickname = community.getUser().getNickname();
+
+
+        String subscriptionLevelCode = community.getSubscriptionLevelCode().getCode();
+
+
+        Integer currentBoard = communityBoardRepository.countByCommunityId(communityId);
+
+
+        List<CommunityBoard> popularBoards = communityBoardRepository
+                .findTop3ByCommunityIdOrderByCreatedAtDesc(communityId);
+        List<CommunityBoardListResponseDto> popularBoardsDto = popularBoards.stream()
+                .map(board -> CommunityBoardListResponseDto.builder()
+                        .communityBoardId(board.getCommunityBoardId())
+                        .name(board.getName())
+                        .description(board.getDescription())
+                        .boardTypeCode(board.getBoardTypeCode().getCode())
+                        .boardStatusCode(board.getBoardStatusCode().getCode())
+                        .build()
+                )
+                .toList();
+
+        return CommunityDetailResponseDto.builder()
+                .communityId(community.getCommunityId().longValue())
+                .name(community.getName())
+                .description(community.getDescription())
+                .profileImageUrl(community.getProfileImageUrl())
+                .subscriptionLevelCode(subscriptionLevelCode)
+                .ownerNickname(ownerNickname)
+                .currentMember(community.getCurrentMember())
+                .currentBoard(currentBoard)
+                .enterPoint(community.getEnterPoint())
+                .popularBoards(popularBoardsDto)
+                .build();
+
+    }
+
 
 }
 

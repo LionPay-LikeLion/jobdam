@@ -62,6 +62,7 @@ public class SnsPostServiceImpl implements SnsPostService {
                             ? post.getUser().getMemberTypeCode().getCode()
                             : null
             );
+            dto.setSubscriptionLevelCode(post.getUser().getSubscriptionLevelCode().getCode());
             return dto;
 
         }).collect(Collectors.toList());
