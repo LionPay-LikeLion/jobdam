@@ -1,10 +1,7 @@
 package com.jobdam.community.controller;
 
 import com.jobdam.common.util.CustomUserDetails;
-import com.jobdam.community.dto.CommunityBoardCreateRequestDto;
-import com.jobdam.community.dto.CommunityPostCreateRequestDto;
-import com.jobdam.community.dto.CommunityPostListResponseDto;
-import com.jobdam.community.dto.CommunityPostUpdateRequestDto;
+import com.jobdam.community.dto.*;
 import com.jobdam.community.service.CommunityPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +24,14 @@ public class CommunityPostController {
             @RequestParam(required = false) String keyword
     ) {
         List<CommunityPostListResponseDto> dto = communityPostService.getPostsByBoard(boardId, postTypeCode, keyword);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<CommunityPostDetailResponseDto> getPostDetail(
+            @PathVariable Integer postId
+    ) {
+        CommunityPostDetailResponseDto dto = communityPostService.getPostDetail(postId);
         return ResponseEntity.ok(dto);
     }
 

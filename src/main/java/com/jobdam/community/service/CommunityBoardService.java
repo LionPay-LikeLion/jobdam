@@ -13,6 +13,8 @@ import com.jobdam.community.repository.CommunityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,12 +79,17 @@ public class CommunityBoardService {
     }
 
     @Transactional
-    public void createBoard(Integer communityId, CommunityBoardCreateRequestDto dto) {
+    public void createBoard(Integer communityId, CommunityBoardCreateRequestDto dto, Integer userId) {
+
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
 
+        if (!community.getUserId().equals(userId)) {
+            throw new AccessDeniedException("게시판을 생성할 권한이 없습니다.");
+        }
+
         // BASIC 커뮤니티이면 개수 제한 확인
-        if (community.getSubscriptionLevelCodeId() == 1) { // BASIC
+        if (community.getSubscriptionLevelCodeId() == 1) {
             int boardCount = communityBoardRepository.countByCommunityId(communityId);
             if (boardCount >= 10) {
                 throw new RuntimeException("일반 커뮤니티는 최대 10개의 게시판만 생성할 수 있습니다.");
