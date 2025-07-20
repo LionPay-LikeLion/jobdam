@@ -26,6 +26,10 @@ spring:
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: sub
+  logging:
+    level:
+      root: info
+      com.jobdam: debug
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

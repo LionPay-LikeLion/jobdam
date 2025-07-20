@@ -1,5 +1,5 @@
-
 package com.jobdam.user.service;
+
 
 import com.jobdam.user.dto.OAuthRegisterRequestDto;
 
@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -84,26 +85,58 @@ public class UserService {
         user.setProfileImageUrl(fileUrl);
         userRepository.save(user);
     }
+    public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
+        System.out.println("DEBUG: Checking for existing Google user with email: " + dto.getEmail());
+
+        // Step 1: Get GOOGLE memberTypeId
+        Integer googleMemberTypeId = memberTypeCodeRepository.findByCode("GOOGLE")
+                .map(MemberTypeCode::getMemberTypeCodeId)
+                .orElse(1);
+
+        // Step 2: Try finding existing Google user (by email + GOOGLE)
+        Optional<User> existingGoogleUser = userRepository.findByEmailAndMemberTypeCodeId(dto.getEmail(), googleMemberTypeId);
+        if (existingGoogleUser.isPresent()) {
+            System.out.println("DEBUG: Found existing Google user with email: " + dto.getEmail());
+            return existingGoogleUser.get();
+        }
+
+        // Step 3: Check for email conflict with non-Google user
+        Optional<User> conflictingUser = userRepository.findByEmail(dto.getEmail());
+        if (conflictingUser.isPresent()) {
+            System.out.println("ERROR: Email conflict - user exists but not as Google login: " + dto.getEmail());
+            throw new IllegalStateException("This email is already registered using another method.");
+        }
+
+        // Step 4: Create new Google user
+        System.out.println("DEBUG: No existing user found. Proceeding to register new Google user.");
+
+        Integer roleCodeId = roleCodeRepository.findByCode("USER")
+                .map(RoleCode::getRoleCodeId)
+                .orElse(1);
+        Integer subscriptionId = subscriptionLevelCodeRepository.findByCode("BASIC")
+                .map(SubscriptionLevelCode::getSubscriptionLevelCodeId)
+                .orElse(1);
+
+        System.out.println("DEBUG: roleCodeId=" + roleCodeId +
+                ", subscriptionId=" + subscriptionId +
+                ", memberTypeId=" + googleMemberTypeId);
+
+        User newUser = User.builder()
+                .email(dto.getEmail())
+                .nickname(dto.getNickname())
+                .roleCodeId(roleCodeId)
+                .subscriptionLevelCodeId(subscriptionId)
+                .memberTypeCodeId(googleMemberTypeId)
+                .profileImageUrl(dto.getProfileImageUrl())
+                .emailVerified(dto.getEmailVerified())
+                .point(0)
+                .build();
+
+        User savedUser = userRepository.save(newUser);
+        System.out.println("DEBUG: New Google user saved with userId: " + savedUser.getUserId());
+        return savedUser;
+    }
+
 
 }
 
-public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
-    return userRepository.findByEmail(dto.getEmail())
-            .orElseGet(() -> {
-                User newUser = User.builder()
-                        .email(dto.getEmail())
-                        .nickname(dto.getNickname())
-                        .roleCodeId(roleCodeRepository.findByCode("USER")
-                                .map(RoleCode::getRoleCodeId)
-                                .orElse(1)) // fallback role id
-                        .subscriptionLevelCodeId(subscriptionLevelCodeRepository.findByCode("BASIC")
-                                .map(SubscriptionLevelCode::getSubscriptionLevelCodeId)
-                                .orElse(1)) // fallback subscription id
-                        .memberTypeCodeId(memberTypeCodeRepository.findByCode("GOOGLE")
-                                .map(MemberTypeCode::getMemberTypeCodeId)
-                                .orElse(1)) // fallback member type
-                        .point(0)
-                        .build();
-                return userRepository.save(newUser);
-            });
-}
