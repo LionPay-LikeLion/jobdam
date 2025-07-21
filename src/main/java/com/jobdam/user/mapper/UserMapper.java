@@ -1,5 +1,7 @@
 package com.jobdam.user.mapper;
 
+import com.jobdam.user.dto.UserProfileDto;
+
 import com.jobdam.code.repository.MemberTypeCodeRepository;
 import com.jobdam.code.repository.RoleCodeRepository;
 import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
@@ -39,5 +41,22 @@ public class UserMapper {
                 .point(0)
                 .build();
     }
+
+    public UserProfileDto toUserProfileDto(User user) {
+        return UserProfileDto.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .remainingPoints(user.getPoint())
+                .subscriptionLevel(user.getSubscriptionLevelCode().getName())
+                .role(user.getRoleCode().getName())
+                .phone(user.getPhone())
+                .profileImageUrl(user.getProfileImageUrl())
+                .memberTypeCode(user.getMemberTypeCode().getName())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
 }
+
+
 

@@ -1,11 +1,16 @@
 package com.jobdam.user.controller;
 
 import com.jobdam.common.util.CustomUserDetails;
+import com.jobdam.user.dto.OAuthRegisterRequestDto;
 import com.jobdam.user.dto.UserProfileDto;
 import com.jobdam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.jobdam.user.dto.ChangePasswordRequestDto;
@@ -52,3 +57,4 @@ public class UserController {
 
 
 }
+

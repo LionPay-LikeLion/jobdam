@@ -1,10 +1,10 @@
 package com.jobdam.admin.entity;
 
+import com.jobdam.code.entity.ReportTypeCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -19,28 +19,38 @@ public class Report {
     private Integer reportId;
 
     @Column(name = "report_type_code_id", nullable = false)
-    private Integer reportTypeCodeId; // 신고 타입 (1: POST, 2: COMMENT, 3: USER)
+    private Integer reportTypeCodeId;
 
     @Column(name = "target_id", nullable = false)
-    private Long targetId; // 어떤 대상에 대한 신고인지 (예: post_id, comment_id 등)
+    private Long targetId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId; // 신고자 ID
+    private Integer userId;
 
     @Column(name = "reason", nullable = false, columnDefinition = "TEXT")
-    private String reason; // 신고 사유
+    private String reason;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // 신고자 연관 관계 (User와의 관계)
+    // User FK
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
+    // ReportTypeCode FK (코드 명칭 join 하고 싶을 때)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "report_type_code_id", insertable = false, updatable = false)
+    private ReportTypeCode reportTypeCode;
+
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
+    @Column(name = "status", nullable = false)
+    private Integer status = 0; // 0: 대기, 1: 허용, 2: 정지, 3: 처리완료
+
+    @Column(name = "processed_at")
+    private LocalDateTime processedAt;
 }
