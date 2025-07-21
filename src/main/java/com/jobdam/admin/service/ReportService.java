@@ -114,7 +114,7 @@ public class ReportService {
         throw new EntityNotFoundException("지원하지 않는 신고 대상 타입입니다.");
     }
 
-    // ====== Entity → DTO 변환 ======
+    // === Entity → DTO 변환 ===
     private ReportResponseDto toDto(Report report) {
         ReportResponseDto dto = new ReportResponseDto();
         dto.setReportId(report.getReportId());
@@ -133,21 +133,32 @@ public class ReportService {
         Integer typeCodeId = report.getReportTypeCodeId();
         Long targetId = report.getTargetId();
         String reportedNickname = "(알수없음)";
-        if (typeCodeId == 1) { // 커뮤니티 게시글
-            reportedNickname = communityPostRepository.findById(targetId.intValue())
-                    .map(post -> {
-                        User user = userRepository.findById(post.getUserId()).orElse(null);
-                        return user != null ? user.getNickname() : "(알수없음)";
-                    }).orElse("(알수없음)");
-        } else if (typeCodeId == 2) { // SNS 게시글
-            reportedNickname = snsPostRepository.findById(targetId.intValue())
-                    .map(post -> {
-                        User user = userRepository.findById(post.getUserId()).orElse(null);
-                        return user != null ? user.getNickname() : "(알수없음)";
-                    }).orElse("(알수없음)");
+
+        try {
+            if (typeCodeId == 1 && targetId != null) { // 커뮤니티 게시글
+                communityPostRepository.findById(targetId.intValue())
+                        .ifPresent(post -> {
+                            userRepository.findById(post.getUserId())
+                                    .ifPresent(user -> dto.setReportedNickname(user.getNickname()));
+                        });
+            } else if (typeCodeId == 2 && targetId != null) { // SNS 게시글
+                snsPostRepository.findById(targetId.intValue())
+                        .ifPresent(post -> {
+                            userRepository.findById(post.getUserId())
+                                    .ifPresent(user -> dto.setReportedNickname(user.getNickname()));
+                        });
+            }
+        } catch (Exception e) {
+            // 혹시라도 변환/조회 중 예외 발생 시 그냥 알수없음
+            dto.setReportedNickname("(알수없음)");
         }
-        dto.setReportedNickname(reportedNickname);
+        // 혹시 위에서 닉네임 못 채웠으면 기본값 유지
+        if (dto.getReportedNickname() == null) {
+            dto.setReportedNickname("(알수없음)");
+        }
 
         return dto;
     }
+
+
 }
