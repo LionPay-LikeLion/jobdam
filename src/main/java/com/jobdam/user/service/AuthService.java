@@ -55,9 +55,15 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
+        // 활동 정지 계정 로그인 차단
+        if (user.getIsActive() != null && !user.getIsActive()) {
+            throw new IllegalArgumentException("활동 정지된 계정입니다. 관리자에게 문의하세요.");
+        }
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+
         System.out.println(">>>>> [Service] 로그인 처리 중, 이메일: " + request.getEmail());
 
         String token = jwtProvider.createToken(
@@ -70,6 +76,7 @@ public class AuthService {
         return token;
     }
 
+
     public LoginResponseDto buildLoginResponse(User user) {
         String accessToken = jwtProvider.createAccessToken(user);
         String refreshToken = jwtProvider.createRefreshToken(user);
@@ -80,4 +87,5 @@ public class AuthService {
                 .user(userMapper.toUserProfileDto(user)) // Adjust based on what your frontend expects
                 .build();
     }
+
 }

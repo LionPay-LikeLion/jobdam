@@ -14,6 +14,8 @@ import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
 import com.jobdam.user.dto.UserProfileDto;
 import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -89,6 +91,14 @@ public class UserService {
         user.setProfileImageUrl(fileUrl);
         userRepository.save(user);
     }
+
+    @Transactional
+    public void deactivateUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 회원이 없습니다."));
+        user.setIsActive(false);
+        userRepository.save(user);
+
     public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
         System.out.println("DEBUG: Checking for existing Google user with email: " + dto.getEmail());
 
@@ -158,6 +168,7 @@ public class UserService {
                 .build();
 
         return new LoginResponseDto(accessToken, refreshToken, profile);
+
     }
 
 }
