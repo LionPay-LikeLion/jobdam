@@ -1,5 +1,10 @@
 package com.jobdam.user.service;
 
+
+import com.jobdam.common.util.JwtProvider;
+import com.jobdam.user.dto.LoginResponseDto;
+import com.jobdam.user.dto.OAuthRegisterRequestDto;
+
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.code.entity.RoleCode;
 import com.jobdam.code.entity.SubscriptionLevelCode;
@@ -17,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,6 +33,7 @@ public class UserService {
     private final SubscriptionLevelCodeRepository subscriptionLevelCodeRepository;
     private final RoleCodeRepository roleCodeRepository;
     private final MemberTypeCodeRepository memberTypeCodeRepository;  // MemberTypeCodeRepository 추가
+    private final JwtProvider jwtProvider;
 
     public UserProfileDto getUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
@@ -45,17 +52,18 @@ public class UserService {
                 .map(MemberTypeCode::getCode)  // 회원 타입 코드 반환
                 .orElse("GENERAL");  // 기본값 설정
 
-        return new UserProfileDto(
-                user.getEmail(),
-                user.getNickname(),
-                user.getPoint(),
-                subscriptionLevel,
-                role,
-                user.getPhone(),
-                user.getProfileImageUrl(),
-                memberTypeCode,  // 회원 타입 코드 포함
-                user.getCreatedAt()  // 회원 가입일 포함
-        );
+        return UserProfileDto.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .remainingPoints(user.getPoint())
+                .subscriptionLevel(subscriptionLevel)
+                .role(role)
+                .phone(user.getPhone())
+                .profileImageUrl(user.getProfileImageUrl())
+                .memberTypeCode(memberTypeCode)
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 
     public void updateProfileImage(Integer userId, MultipartFile image) {
@@ -83,12 +91,85 @@ public class UserService {
         user.setProfileImageUrl(fileUrl);
         userRepository.save(user);
     }
+
     @Transactional
     public void deactivateUser(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 회원이 없습니다."));
         user.setIsActive(false);
         userRepository.save(user);
+
+    public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
+        System.out.println("DEBUG: Checking for existing Google user with email: " + dto.getEmail());
+
+        // Step 1: Get GOOGLE memberTypeId
+        Integer googleMemberTypeId = memberTypeCodeRepository.findByCode("GOOGLE")
+                .map(MemberTypeCode::getMemberTypeCodeId)
+                .orElse(1);
+
+        // Step 2: Try finding existing Google user (by email + GOOGLE)
+        Optional<User> existingGoogleUser = userRepository.findByEmailAndMemberTypeCodeId(dto.getEmail(), googleMemberTypeId);
+        if (existingGoogleUser.isPresent()) {
+            System.out.println("DEBUG: Found existing Google user with email: " + dto.getEmail());
+            return existingGoogleUser.get();
+        }
+
+        // Step 3: Check for email conflict with non-Google user
+        Optional<User> conflictingUser = userRepository.findByEmail(dto.getEmail());
+        if (conflictingUser.isPresent()) {
+            System.out.println("ERROR: Email conflict - user exists but not as Google login: " + dto.getEmail());
+            throw new IllegalStateException("This email is already registered using another method.");
+        }
+
+        // Step 4: Create new Google user
+        System.out.println("DEBUG: No existing user found. Proceeding to register new Google user.");
+
+        Integer roleCodeId = roleCodeRepository.findByCode("USER")
+                .map(RoleCode::getRoleCodeId)
+                .orElse(1);
+        Integer subscriptionId = subscriptionLevelCodeRepository.findByCode("BASIC")
+                .map(SubscriptionLevelCode::getSubscriptionLevelCodeId)
+                .orElse(1);
+
+        System.out.println("DEBUG: roleCodeId=" + roleCodeId +
+                ", subscriptionId=" + subscriptionId +
+                ", memberTypeId=" + googleMemberTypeId);
+
+        User newUser = User.builder()
+                .email(dto.getEmail())
+                .nickname(dto.getNickname())
+                .roleCodeId(roleCodeId)
+                .subscriptionLevelCodeId(subscriptionId)
+                .memberTypeCodeId(googleMemberTypeId)
+                .profileImageUrl(dto.getProfileImageUrl())
+                .emailVerified(dto.getEmailVerified())
+                .point(0)
+                .build();
+
+        User savedUser = userRepository.save(newUser);
+        System.out.println("DEBUG: New Google user saved with userId: " + savedUser.getUserId());
+        return savedUser;
+    }
+
+    public LoginResponseDto buildLoginResponse(User user) {
+        String accessToken = jwtProvider.createToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+        String refreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+
+        UserProfileDto profile = UserProfileDto.builder()
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .remainingPoints(user.getPoint())
+                .subscriptionLevel(user.getSubscriptionLevelCode().getName())
+                .role(user.getRoleCode().getCode())
+                .phone(user.getPhone())
+                .profileImageUrl(user.getProfileImageUrl())
+                .memberTypeCode(user.getMemberTypeCode().getName())
+                .createdAt(user.getCreatedAt())
+                .build();
+
+        return new LoginResponseDto(accessToken, refreshToken, profile);
+
     }
 
 }
+

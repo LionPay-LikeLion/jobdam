@@ -2,9 +2,10 @@ package com.jobdam.user.service;
 
 import com.jobdam.common.util.JwtProvider;
 import com.jobdam.user.dto.LoginRequestDto;
+import com.jobdam.user.dto.LoginResponseDto;
 import com.jobdam.user.dto.RegisterRequestDto;
 import com.jobdam.user.entity.User;
-import com.jobdam.user.mapper.UserMapper;
+import com.jobdam.user.mapper.*;
 import com.jobdam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -75,5 +76,16 @@ public class AuthService {
         return token;
     }
 
+
+    public LoginResponseDto buildLoginResponse(User user) {
+        String accessToken = jwtProvider.createAccessToken(user);
+        String refreshToken = jwtProvider.createRefreshToken(user);
+
+        return LoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(userMapper.toUserProfileDto(user)) // Adjust based on what your frontend expects
+                .build();
+    }
 
 }

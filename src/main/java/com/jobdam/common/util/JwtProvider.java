@@ -1,10 +1,9 @@
 package com.jobdam.common.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,44 +11,87 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String secretKey;
 
+    private Key key;
+
+    // 1 hour for access token
     private final long accessTokenValidTime = 1000L * 60 * 60;
 
-    private Key getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    // 2 weeks for refresh token
+    private final long refreshTokenValidTime = 1000L * 60 * 60 * 24 * 14;
+
+    @PostConstruct
+    protected void init() {
+        byte[] decodedKey = Base64.getEncoder().encode(secretKey.getBytes());
+        this.key = Keys.hmacShaKeyFor(decodedKey);
     }
 
     public String createToken(Integer userId, String email, String roleCode) {
-        System.out.println(">>>>> [JwtProvider] JWT 생성 시작 - userId: " + userId + ", 이메일: " + email + ", role: " + roleCode);
+        return createTokenWithCustomValidity(userId, email, roleCode, accessTokenValidTime);
+    }
 
-        Date now = new Date(); // 현재 시간
-        Date validity = new Date(now.getTime() + accessTokenValidTime); // 만료 시간
+    public String createRefreshToken(Integer userId, String email, String roleCode) {
+        return createTokenWithCustomValidity(userId, email, roleCode, refreshTokenValidTime);
+    }
 
-        Claims claims = Jwts.claims().setSubject(userId.toString()); // sub를 userId로 설정
+    public String createAccessToken(com.jobdam.user.entity.User user) {
+        return createToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+    }
+
+    public String createRefreshToken(com.jobdam.user.entity.User user) {
+        return createRefreshToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+    }
+
+    private String createTokenWithCustomValidity(Integer userId, String email, String roleCode, long validityMillis) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + validityMillis);
+
+        Claims claims = Jwts.claims().setSubject(userId.toString());
         claims.put("email", email);
         claims.put("role", roleCode);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(now)         // iat
-                .setExpiration(validity)  // exp
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    public boolean validateToken(String token) {
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return !claims.getBody().getExpiration().before(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("❌ Invalid or expired JWT token: {}", e.getMessage());
+            return false;
+        }
+    }
 
-    public Claims parseClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
-}
 
+    public String reissueAccessToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Refresh token is invalid or expired");
+        }
+
+        Claims claims = getClaims(refreshToken);
+        Integer userId = Integer.parseInt(claims.getSubject());
+        String email = claims.get("email", String.class);
+        String role = claims.get("role", String.class);
+
+        return createToken(userId, email, role);
+    }
+}
