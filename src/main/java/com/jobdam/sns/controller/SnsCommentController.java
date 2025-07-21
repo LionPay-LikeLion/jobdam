@@ -7,6 +7,7 @@ import com.jobdam.sns.service.SnsCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.jobdam.sns.dto.MySnsCommentResponseDto;
 
 import java.util.List;
 
@@ -39,5 +40,10 @@ public class SnsCommentController {
     public void deleteComment(@PathVariable Integer commentId,
                               @AuthenticationPrincipal CustomUserDetails user) {
         snsCommentService.deleteComment(commentId, user.getUserId());
+    }
+
+    @GetMapping("/my")
+    public List<MySnsCommentResponseDto> getMyComments(@AuthenticationPrincipal CustomUserDetails user) {
+        return snsCommentService.getMyComments(user.getUserId());
     }
 }

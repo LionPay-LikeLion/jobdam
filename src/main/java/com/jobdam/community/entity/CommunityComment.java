@@ -60,5 +60,8 @@ public class CommunityComment {
     @JoinColumn(name = "board_status_code_id", insertable = false, updatable = false)
     private BoardStatusCode boardStatusCode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_post_id", insertable = false, updatable = false)
+    private CommunityPost communityPost;
 }
 
