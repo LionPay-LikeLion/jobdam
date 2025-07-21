@@ -43,9 +43,14 @@ public class ReportService {
         reportRepository.save(report);
     }
 
-    // 목록(페이징, 동적검색 옵션 가능)
-    public Page<ReportResponseDto> getReports(Pageable pageable) {
-        Page<Report> page = reportRepository.findAll(pageable);
+    // 목록(페이징, status 필터 가능)
+    public Page<ReportResponseDto> getReports(Integer status, Pageable pageable) {
+        Page<Report> page;
+        if (status == null) {
+            page = reportRepository.findAll(pageable);
+        } else {
+            page = reportRepository.findByStatus(status, pageable);
+        }
         return page.map(this::toDto);
     }
 
@@ -66,41 +71,30 @@ public class ReportService {
     // === 신고대상 회원 활동정지 및 신고 처리완료 ===
     @Transactional
     public void processReportAndDeactivate(Integer reportId) {
-        System.out.println("==== processReportAndDeactivate 진입, reportId=" + reportId);
-
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 신고가 없습니다."));
-        System.out.println("==== Report 로드 완료, report=" + report);
-
         report.setStatus(2); // 2: 정지
         report.setProcessedAt(LocalDateTime.now());
         reportRepository.save(report);
-        System.out.println("==== 신고 상태(status=2) 및 처리일시 저장 완료");
 
         // 피신고자 찾기 (reportTypeCodeId 기준 분기)
         Integer reportedUserId = getReportedUserId(report);
-        System.out.println("==== 피신고자 userId=" + reportedUserId);
-
         User user = userRepository.findById(reportedUserId)
                 .orElseThrow(() -> new EntityNotFoundException("피신고 회원 없음"));
-        System.out.println("==== User 로드 완료, isActive(before)=" + user.getIsActive());
 
         user.setIsActive(false); // is_active=0
         userRepository.save(user);
-        System.out.println("==== User isActive 업데이트 완료, isActive(after)=" + user.getIsActive());
     }
 
     // === 신고 허용(처리완료) ===
     @Transactional
     public void approveReport(Integer reportId) {
-        System.out.println("==== approveReport 진입, reportId=" + reportId);
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 신고가 없습니다."));
 
         report.setStatus(1); // 1: 허용(그냥 처리완료)
         report.setProcessedAt(LocalDateTime.now());
         reportRepository.save(report);
-        System.out.println("==== 신고 허용(status=1) 및 처리일시 저장 완료");
     }
 
     // ====== 핵심: 신고 대상에 따라 피신고자 userId 찾기 ======
