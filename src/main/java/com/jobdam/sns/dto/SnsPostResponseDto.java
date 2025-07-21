@@ -21,6 +21,7 @@ public class SnsPostResponseDto {
     private int likeCount;
     private int commentCount;
     private String memberTypeCode;
+    private String subscriptionLevelCode;
 
 
     private boolean isLiked;

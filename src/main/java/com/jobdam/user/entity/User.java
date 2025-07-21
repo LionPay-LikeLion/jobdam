@@ -46,8 +46,9 @@ public class User {
     @org.hibernate.annotations.CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Builder.Default
     @Column
-    private Integer point;
+    private Integer point = 0;
 
     @Column(length = 20)
     private String phone;
@@ -73,6 +74,16 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_code_id", insertable = false, updatable = false)
     private RoleCode roleCode;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "provider_type")
+    private String providerType;
+
+    @Builder.Default
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
 
     /*
     // Re-enable this if you want relation to post
