@@ -5,7 +5,11 @@ import com.jobdam.user.dto.OAuthRegisterRequestDto;
 import com.jobdam.user.dto.UserProfileDto;
 import com.jobdam.user.dto.UserSearchResponseDto;
 import com.jobdam.user.service.UserService;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,6 +68,9 @@ public class UserController {
         List<UserSearchResponseDto> response = userService.searchUsersByNickname(keyword, user.getUserId());
         return ResponseEntity.ok(response);
     }
+
+
+
 
 
 
