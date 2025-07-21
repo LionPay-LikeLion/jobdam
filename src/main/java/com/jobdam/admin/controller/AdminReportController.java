@@ -14,13 +14,14 @@ public class AdminReportController {
 
     private final ReportService reportService;
 
-    // 신고 목록 (관리자)
+    // 신고 목록 (관리자) - status 파라미터로 필터링
     @GetMapping
     public Page<ReportResponseDto> getReports(
+            @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        return reportService.getReports(PageRequest.of(page, size));
+        return reportService.getReports(status, PageRequest.of(page, size));
     }
 
     // 신고 상세 (관리자)

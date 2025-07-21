@@ -13,4 +13,8 @@ public interface ReportRepository extends JpaRepository<Report, Integer>, JpaSpe
     @Override
     @EntityGraph(attributePaths = {"user", "reportTypeCode"})
     Page<Report> findAll(Pageable pageable);
+
+    // status별 페이징 검색
+    @EntityGraph(attributePaths = {"user", "reportTypeCode"})
+    Page<Report> findByStatus(Integer status, Pageable pageable);
 }
