@@ -1,6 +1,5 @@
 package com.jobdam.user.service;
 
-
 import com.jobdam.common.util.JwtProvider;
 import com.jobdam.user.dto.LoginResponseDto;
 import com.jobdam.user.dto.OAuthRegisterRequestDto;
@@ -32,14 +31,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final SubscriptionLevelCodeRepository subscriptionLevelCodeRepository;
     private final RoleCodeRepository roleCodeRepository;
-    private final MemberTypeCodeRepository memberTypeCodeRepository;  // MemberTypeCodeRepository 추가
+    private final MemberTypeCodeRepository memberTypeCodeRepository;
     private final JwtProvider jwtProvider;
 
     public UserProfileDto getUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
 
-        // 구독 레벨과 역할 정보 가져오기
         String subscriptionLevel = subscriptionLevelCodeRepository.findById(user.getSubscriptionLevelCodeId())
                 .map(SubscriptionLevelCode::getCode)
                 .orElse("BASIC");
@@ -49,8 +47,8 @@ public class UserService {
                 .orElse("USER");
 
         String memberTypeCode = memberTypeCodeRepository.findById(user.getMemberTypeCodeId())
-                .map(MemberTypeCode::getCode)  // 회원 타입 코드 반환
-                .orElse("GENERAL");  // 기본값 설정
+                .map(MemberTypeCode::getCode)
+                .orElse("GENERAL");
 
         return UserProfileDto.builder()
                 .userId(user.getUserId())
@@ -98,6 +96,7 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 회원이 없습니다."));
         user.setIsActive(false);
         userRepository.save(user);
+    }
 
     public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
         System.out.println("DEBUG: Checking for existing Google user with email: " + dto.getEmail());
@@ -168,8 +167,5 @@ public class UserService {
                 .build();
 
         return new LoginResponseDto(accessToken, refreshToken, profile);
-
     }
-
 }
-
