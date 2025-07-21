@@ -3,6 +3,7 @@ package com.jobdam.user.controller;
 import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.user.dto.OAuthRegisterRequestDto;
 import com.jobdam.user.dto.UserProfileDto;
+import com.jobdam.user.dto.UserSearchResponseDto;
 import com.jobdam.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.jobdam.user.dto.ChangePasswordRequestDto;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -53,6 +56,15 @@ public class UserController {
         userService.changePassword(userDetails.getUserId(), requestDto);
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserSearchResponseDto>> searchUsers(
+            @RequestParam String keyword,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        List<UserSearchResponseDto> response = userService.searchUsersByNickname(keyword, user.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
 
 
 

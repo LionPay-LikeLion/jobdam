@@ -1,8 +1,7 @@
 package com.jobdam.user.service;
 
 import com.jobdam.common.util.JwtProvider;
-import com.jobdam.user.dto.LoginResponseDto;
-import com.jobdam.user.dto.OAuthRegisterRequestDto;
+import com.jobdam.user.dto.*;
 
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.code.entity.RoleCode;
@@ -10,22 +9,23 @@ import com.jobdam.code.entity.SubscriptionLevelCode;
 import com.jobdam.code.repository.MemberTypeCodeRepository;
 import com.jobdam.code.repository.RoleCodeRepository;
 import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
-import com.jobdam.user.dto.UserProfileDto;
 import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.jobdam.user.dto.ChangePasswordRequestDto;
-import com.jobdam.user.dto.ChangePasswordRequestDto;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -197,5 +197,21 @@ public class UserService {
                 .build();
 
         return new LoginResponseDto(accessToken, refreshToken, profile);
+    }
+
+    public List<UserSearchResponseDto> searchUsersByNickname(String keyword, Integer excludeUserId) {
+        List<User> users = userRepository.findByNicknameContainingIgnoreCaseAndUserIdNot(
+                keyword, excludeUserId, PageRequest.of(0, 10)
+        );
+
+        return users.stream()
+                .map(user -> UserSearchResponseDto.builder()
+                        .userId(user.getUserId())
+                        .nickname(user.getNickname())
+                        .profileImageUrl(user.getProfileImageUrl())
+                        .subscriptionLevelCode(user.getSubscriptionLevelCode() != null ? user.getSubscriptionLevelCode().getCode() : null)
+                        .memberTypeCode(user.getMemberTypeCode() != null ? user.getMemberTypeCode().getCode() : null)
+                        .build())
+                .collect(Collectors.toList());
     }
 }

@@ -39,6 +39,7 @@ public class UserMapper {
                 .roleCodeId(roleCode.getRoleCodeId())
                 .memberTypeCodeId(memberTypeCode.getMemberTypeCodeId())
                 .point(0)
+                .isActive(true)
                 .build();
     }
 
