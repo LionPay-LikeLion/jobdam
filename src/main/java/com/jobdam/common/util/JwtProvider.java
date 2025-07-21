@@ -49,6 +49,7 @@ public class JwtProvider {
     }
 
     private String createTokenWithCustomValidity(Integer userId, String email, String roleCode, long validityMillis) {
+
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityMillis);
 
@@ -62,6 +63,7 @@ public class JwtProvider {
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
     }
 
     public boolean validateToken(String token) {
