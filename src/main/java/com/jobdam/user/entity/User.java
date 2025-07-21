@@ -98,9 +98,6 @@ public class User {
     private SnsPost post;
     */
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
-
     //@Column(name = "active_at")
     //private LocalDateTime activeAt;
 
