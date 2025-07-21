@@ -1,6 +1,8 @@
 package com.jobdam.user.service;
 
 
+import com.jobdam.common.util.JwtProvider;
+import com.jobdam.user.dto.LoginResponseDto;
 import com.jobdam.user.dto.OAuthRegisterRequestDto;
 
 import com.jobdam.code.entity.MemberTypeCode;
@@ -29,6 +31,7 @@ public class UserService {
     private final SubscriptionLevelCodeRepository subscriptionLevelCodeRepository;
     private final RoleCodeRepository roleCodeRepository;
     private final MemberTypeCodeRepository memberTypeCodeRepository;  // MemberTypeCodeRepository 추가
+    private final JwtProvider jwtProvider;
 
     public UserProfileDto getUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
@@ -47,17 +50,18 @@ public class UserService {
                 .map(MemberTypeCode::getCode)  // 회원 타입 코드 반환
                 .orElse("GENERAL");  // 기본값 설정
 
-        return new UserProfileDto(
-                user.getEmail(),
-                user.getNickname(),
-                user.getPoint(),
-                subscriptionLevel,
-                role,
-                user.getPhone(),
-                user.getProfileImageUrl(),
-                memberTypeCode,  // 회원 타입 코드 포함
-                user.getCreatedAt()  // 회원 가입일 포함
-        );
+        return UserProfileDto.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .remainingPoints(user.getPoint())
+                .subscriptionLevel(subscriptionLevel)
+                .role(role)
+                .phone(user.getPhone())
+                .profileImageUrl(user.getProfileImageUrl())
+                .memberTypeCode(memberTypeCode)
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 
     public void updateProfileImage(Integer userId, MultipartFile image) {
@@ -137,6 +141,24 @@ public class UserService {
         return savedUser;
     }
 
+    public LoginResponseDto buildLoginResponse(User user) {
+        String accessToken = jwtProvider.createToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+        String refreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+
+        UserProfileDto profile = UserProfileDto.builder()
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .remainingPoints(user.getPoint())
+                .subscriptionLevel(user.getSubscriptionLevelCode().getName())
+                .role(user.getRoleCode().getCode())
+                .phone(user.getPhone())
+                .profileImageUrl(user.getProfileImageUrl())
+                .memberTypeCode(user.getMemberTypeCode().getName())
+                .createdAt(user.getCreatedAt())
+                .build();
+
+        return new LoginResponseDto(accessToken, refreshToken, profile);
+    }
 
 }
 

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UserProfileDto {
 
+    private Integer userId;
     private String email;
     private String nickname;
     private Integer remainingPoints;

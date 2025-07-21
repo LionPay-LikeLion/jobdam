@@ -1,10 +1,12 @@
 package com.jobdam.user.dto;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Builder
+@Data
 public class OAuthRegisterRequestDto {
     private String providerId;          // e.g., Google sub
     private String providerType;        // e.g., GOOGLE, KAKAO, APPLE

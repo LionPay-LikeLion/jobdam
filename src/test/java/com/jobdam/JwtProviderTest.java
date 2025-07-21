@@ -51,7 +51,7 @@ public class JwtProviderTest {
     @Test
     void parseClaims_shouldReturnClaimsWithCorrectSubjectAndRole() {
         String token = jwtProvider.createToken(1, "user@example.com", "USER");
-        Claims claims = jwtProvider.parseClaims(token);
+        Claims claims = jwtProvider.getClaims(token);
 
         assertEquals("1", claims.getSubject()); // sub가 userId로 변경됨
         assertEquals("user@example.com", claims.get("email", String.class)); // email은 claim으로
@@ -62,6 +62,6 @@ public class JwtProviderTest {
     @Test
     void parseClaims_shouldThrowExceptionForExpiredToken() {
         String expiredToken = createExpiredToken();
-        assertThrows(ExpiredJwtException.class, () -> jwtProvider.parseClaims(expiredToken));
+        assertThrows(ExpiredJwtException.class, () -> jwtProvider.getClaims(expiredToken));
     }
 }
