@@ -74,6 +74,10 @@ public class User {
     @JoinColumn(name = "role_code_id", insertable = false, updatable = false)
     private RoleCode roleCode;
 
+    // ...생략...
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     /*
     // Re-enable this if you want relation to post
     @ManyToOne(fetch = FetchType.LAZY)
