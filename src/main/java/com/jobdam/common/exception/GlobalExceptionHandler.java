@@ -29,11 +29,13 @@ public class GlobalExceptionHandler {
 
     }
 
-  
-      @ExceptionHandler(IllegalArgumentException.class)
-      public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
-          return ResponseEntity.badRequest().body(ex.getMessage());
-      }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
+        return ResponseEntity
+                .badRequest()
+                .body(Map.of("message", e.getMessage()));
+    }
 
 
 }
