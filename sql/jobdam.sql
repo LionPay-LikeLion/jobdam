@@ -147,7 +147,7 @@ INSERT INTO report_type_code (code, name) VALUES
 CREATE TABLE user (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(100) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NULL,
   nickname VARCHAR(50) NOT NULL,
   subscription_level_code_id INT NOT NULL DEFAULT 1,  
   role_code_id INT NOT NULL DEFAULT 1,
@@ -156,6 +156,9 @@ CREATE TABLE user (
   point INT DEFAULT 0,
   phone VARCHAR(20),
   profile_image_url VARCHAR(255),
+  provider_id VARCHAR(255) DEFAULT NULL COMMENT 'OAuth provider unique ID (e.g., Google sub)',
+  provider_type VARCHAR(50) DEFAULT NULL COMMENT 'OAuth provider name (e.g., GOOGLE, KAKAO, LOCAL)',
+  email_verified BOOLEAN DEFAULT FALSE COMMENT 'Whether the user\'s email is verified',
   FOREIGN KEY (subscription_level_code_id) REFERENCES subscription_level_code(subscription_level_code_id),
   FOREIGN KEY (role_code_id) REFERENCES role_code(role_code_id),
   FOREIGN KEY (member_type_code_id) REFERENCES member_type_code(member_type_code_id)
