@@ -118,17 +118,38 @@ public class MembertypeChangeService {
     }
 
     private MembertypeChangeResponseDto toDto(MembertypeChange entity) {
+        // 상태코드 → 숫자 변환 (예시, 코드/DB에 맞게 보정)
+        int statusCode = 0;
+        String code = entity.getRequestAdminStatusCode().getCode();
+        // "PENDING": 0, "REJECTED": 1, "APPROVED": 2 (예시)
+        if ("PENDING".equals(code)) statusCode = 0;
+        else if ("REJECTED".equals(code)) statusCode = 1;
+        else if ("APPROVED".equals(code)) statusCode = 2;
+
+        // 한글 역할명 변환
+        String requestedMemberTypeName = switch (entity.getRequestedMemberTypeCode().getCode()) {
+            case "EMPLOYEE" -> "기업회원";
+            case "HUNTER" -> "컨설턴트";
+            case "GENERAL" -> "일반회원";
+            default -> entity.getRequestedMemberTypeCode().getCode();
+        };
+
         return MembertypeChangeResponseDto.builder()
                 .requestId(entity.getMembertypeChangeId())
                 .userEmail(entity.getUser().getEmail())
                 .userNickname(entity.getUser().getNickname())
+//                .userName(entity.getUser().getName()) // User 엔티티에 getName()이 있다면
                 .currentMemberTypeCode(entity.getCurrentMemberTypeCode().getCode())
                 .requestedMemberTypeCode(entity.getRequestedMemberTypeCode().getCode())
+                .requestedMemberTypeName(requestedMemberTypeName)
                 .title(entity.getTitle())
                 .requestStatus(entity.getRequestAdminStatusCode().getCode())
+                .requestStatusCode(statusCode)
+                .attachmentUrl(entity.getAttachmentUrl())
                 .requestedAt(entity.getRequestedAt())
                 .build();
     }
+
 
     @Transactional(readOnly = true)
     public MembertypeChangeDetailResponseDto getDetail(Integer requestId) {
