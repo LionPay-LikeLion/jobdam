@@ -97,4 +97,17 @@ public class User {
     @JoinColumn(name = "sns_post_id", insertable = false, updatable = false)
     private SnsPost post;
     */
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    //@Column(name = "active_at")
+    //private LocalDateTime activeAt;
+
+    public void deactivate() {
+        this.isActive = false;
+       // this.activeAt = LocalDateTime.now();
+    }
+
+
 }
