@@ -55,7 +55,6 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
 
-
 management:
   endpoints:
     web:

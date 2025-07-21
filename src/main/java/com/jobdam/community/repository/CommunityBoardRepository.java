@@ -11,5 +11,6 @@ public interface CommunityBoardRepository extends JpaRepository<CommunityBoard, 
     List<CommunityBoard> findAllByCommunityIdOrderByCreatedAtDesc(Integer communityId);
     int countByCommunityId(Integer communityId);
 
+    List<CommunityBoard> findTop3ByCommunityIdOrderByCreatedAtDesc(Integer communityId);
 }
 

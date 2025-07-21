@@ -2,6 +2,7 @@ package com.jobdam.community.controller;
 
 import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.community.dto.CommunityCreateRequestDto;
+import com.jobdam.community.dto.CommunityDetailResponseDto;
 import com.jobdam.community.dto.CommunityListResponseDto;
 import com.jobdam.community.service.CommunityService;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,12 @@ public class CommunityController {
             @AuthenticationPrincipal CustomUserDetails user) {
         communityService.joinCommunity(user.getUserId(), communityId);
         return ResponseEntity.ok("커뮤니티에 가입되었습니다.");
+    }
+
+    @GetMapping("/{communityId}")
+    public ResponseEntity<CommunityDetailResponseDto> getCommunityDetail(@PathVariable Integer communityId) {
+        CommunityDetailResponseDto dto = communityService.getCommunityDetail(communityId);
+        return ResponseEntity.ok(dto);
     }
 
 }
