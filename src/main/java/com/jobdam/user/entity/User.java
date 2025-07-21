@@ -75,6 +75,11 @@ public class User {
     @JoinColumn(name = "role_code_id", insertable = false, updatable = false)
     private RoleCode roleCode;
 
+
+    // ...생략...
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     @Column(name = "provider_id")
     private String providerId;
 
@@ -85,10 +90,21 @@ public class User {
     @Column(name = "email_verified")
     private Boolean emailVerified = false;
 
+
     /*
     // Re-enable this if you want relation to post
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sns_post_id", insertable = false, updatable = false)
     private SnsPost post;
     */
+
+    //@Column(name = "active_at")
+    //private LocalDateTime activeAt;
+
+    public void deactivate() {
+        this.isActive = false;
+       // this.activeAt = LocalDateTime.now();
+    }
+
+
 }

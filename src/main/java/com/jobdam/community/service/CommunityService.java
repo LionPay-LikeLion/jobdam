@@ -1,6 +1,7 @@
 package com.jobdam.community.service;
 
 import com.jobdam.code.entity.SubscriptionLevelCode;
+import com.jobdam.common.service.FileService;
 import com.jobdam.community.dto.*;
 import com.jobdam.community.entity.Community;
 import com.jobdam.community.entity.CommunityBoard;
@@ -39,6 +40,7 @@ public class CommunityService {
     private final PaymentRepository paymentRepository;
     private final CommunitySubscriptionRepository communitySubscriptionRepository;
     private final CommunityBoardRepository communityBoardRepository;
+    private final FileService fileService;
 
 
     private static final int PAYMENT_TYPE_COMMUNITY_JOIN = 2;  // 커뮤니티 가입
@@ -54,25 +56,12 @@ public class CommunityService {
             throw new RuntimeException("구독 레벨이 2여야 커뮤니티를 생성할 수 있습니다.");
         }
 
+
         String imageUrl = null;
         if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + "community" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + dto.getProfileImage().getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-            try {
-                dto.getProfileImage().transferTo(dest);
-                imageUrl = "/uploads/community/" + userId + "/" + fileName;
-            } catch (IOException | IllegalStateException e) {
-                // 예외 로그 출력 (실제 운영환경에서는 log.error로 남기기)
-                e.printStackTrace();
-                // 사용자에게 알릴 수 있도록 런타임 예외 던지기
-                throw new RuntimeException("프로필 이미지 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(dto.getProfileImage());
+            imageUrl = "/api/files/" + fileId;
         }
-
 
         Community community = new Community();
         community.setName(dto.getName());
@@ -98,6 +87,7 @@ public class CommunityService {
 
         return community.getCommunityId();
     }
+
 
 
     @Transactional
