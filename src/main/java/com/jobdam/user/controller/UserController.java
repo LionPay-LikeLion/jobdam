@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.jobdam.user.dto.ChangePasswordRequestDto;
 
 @RestController
 @RequestMapping("/api/user")
@@ -31,5 +32,23 @@ public class UserController {
         userService.updateProfileImage(user.getUserId(), image);
         return ResponseEntity.ok("프로필 이미지가 변경되었습니다.");
     }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<String> withdrawUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Integer userId = userDetails.getUserId();
+        userService.withdrawUser(userId);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<String> changePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ChangePasswordRequestDto requestDto
+    ) {
+        userService.changePassword(userDetails.getUserId(), requestDto);
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
+
+
 
 }

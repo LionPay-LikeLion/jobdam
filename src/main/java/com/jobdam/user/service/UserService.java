@@ -12,6 +12,9 @@ import com.jobdam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.jobdam.user.dto.ChangePasswordRequestDto;
+import com.jobdam.user.dto.ChangePasswordRequestDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,5 +84,34 @@ public class UserService {
         user.setProfileImageUrl(fileUrl);
         userRepository.save(user);
     }
+
+    public void withdrawUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+
+        if (Boolean.FALSE.equals(user.getIsActive())) {
+            throw new IllegalStateException("이미 탈퇴한 회원입니다.");
+        }
+
+        user.deactivate(); // 소프트 삭제
+        userRepository.save(user);
+    }
+
+    private final PasswordEncoder passwordEncoder;
+    public void changePassword(Integer userId, ChangePasswordRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호로 변경
+        user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+        userRepository.save(user);
+    }
+
+
 
 }
