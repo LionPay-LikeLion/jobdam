@@ -1,5 +1,6 @@
 package com.jobdam.sns.service;
 
+import com.jobdam.common.service.FileService;
 import com.jobdam.sns.dto.SnsPostRequestDto;
 import com.jobdam.sns.dto.SnsPostResponseDto;
 import com.jobdam.sns.entity.SnsPost;
@@ -36,6 +37,7 @@ public class SnsPostServiceImpl implements SnsPostService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final SnsCommentRepository  snsCommentRepository;
+    private final FileService fileService;
 
     @Override
     @Transactional(readOnly = true)
@@ -175,53 +177,28 @@ public class SnsPostServiceImpl implements SnsPostService {
             }
         }
 
-
         String imageUrl = null;
         if (requestDto.getImage() != null && !requestDto.getImage().isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + requestDto.getImage().getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-            try {
-                requestDto.getImage().transferTo(dest);
-                imageUrl = "/uploads/" + userId + "/" + fileName;
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                throw new RuntimeException("이미지 파일 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(requestDto.getImage());
+            imageUrl = "/api/files/" + fileId;
         }
 
         String attachmentUrl = null;
         if (requestDto.getAttachment() != null && !requestDto.getAttachment().isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + requestDto.getAttachment().getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-            try {
-                requestDto.getAttachment().transferTo(dest);
-                attachmentUrl = "/uploads/" + userId + "/" + fileName;
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                throw new RuntimeException("첨부파일 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(requestDto.getAttachment());
+            attachmentUrl = "/api/files/" + fileId;
         }
-
 
         SnsPost post = new SnsPost();
         post.setUserId(userId);
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
-        post.setImageUrl(imageUrl);        // 저장된 경로
-        post.setAttachmentUrl(attachmentUrl); // 저장된 경로
+        post.setImageUrl(imageUrl);        // 저장된 경로 (null 가능)
+        post.setAttachmentUrl(attachmentUrl); // 저장된 경로 (null 가능)
 
         snsPostRepository.save(post);
         return post.getSnsPostId();
     }
-
 
     @Override
     @Transactional
@@ -236,39 +213,17 @@ public class SnsPostServiceImpl implements SnsPostService {
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
 
-        // ---- 이미지 파일 새로 업로드 시 ----
         if (requestDto.getImage() != null && !requestDto.getImage().isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + requestDto.getImage().getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-            try {
-                requestDto.getImage().transferTo(dest);
-                post.setImageUrl("/uploads/" + userId + "/" + fileName);
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                throw new RuntimeException("이미지 파일 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(requestDto.getImage());
+            post.setImageUrl("/api/files/" + fileId);
         }
 
         if (requestDto.getAttachment() != null && !requestDto.getAttachment().isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + requestDto.getAttachment().getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-            try {
-                requestDto.getAttachment().transferTo(dest);
-                post.setAttachmentUrl("/uploads/" + userId + "/" + fileName);
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                throw new RuntimeException("첨부파일 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(requestDto.getAttachment());
+            post.setAttachmentUrl("/api/files/" + fileId);
         }
     }
+
 
 
     @Override

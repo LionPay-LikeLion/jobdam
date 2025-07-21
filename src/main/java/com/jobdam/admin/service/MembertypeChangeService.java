@@ -9,6 +9,7 @@ import com.jobdam.code.entity.AdminStatusCode;
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.code.repository.AdminStatusCodeRepository;
 import com.jobdam.code.repository.MemberTypeCodeRepository;
+import com.jobdam.common.service.FileService;
 import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +30,14 @@ public class MembertypeChangeService {
     private final MemberTypeCodeRepository memberTypeCodeRepository;
     private final UserRepository userRepository;
     private final AdminStatusCodeRepository adminStatusCodeRepository;
+    private final FileService fileService;
 
     public void createRequest(Integer userId, MembertypeChangeRequestDto dto) {
-
 
         boolean hasPending = membertypeChangeRepository.existsByUserIdAndRequestAdminStatusCode_Code(userId, "PENDING");
         if (hasPending) {
             throw new IllegalStateException("이미 처리 대기 중인 신청이 존재합니다.");
         }
-
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
@@ -48,28 +48,14 @@ public class MembertypeChangeService {
         MemberTypeCode requestedType = memberTypeCodeRepository.findByCode(dto.getRequestedMemberTypeCode())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 요청 회원 타입 코드"));
 
+        // ==== 첨부파일 저장 방식만 변경 ====
         String fileUrl = null;
         if (dto.getAttachment() != null && !dto.getAttachment().isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + dto.getAttachment().getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-
-            try {
-                dto.getAttachment().transferTo(dest);
-                fileUrl = "/uploads/" + userId + "/" + fileName;
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(dto.getAttachment());
+            fileUrl = "/api/files/" + fileId;
         }
 
-
-
         MembertypeChange entity = MembertypeChange.builder()
-
                 .userId(userId)
                 .currentMemberTypeCodeId(currentType.getMemberTypeCodeId())
                 .requestedMemberTypeCodeId(requestedType.getMemberTypeCodeId())
@@ -77,7 +63,7 @@ public class MembertypeChangeService {
                 .reason(dto.getReason())
                 .content(dto.getContent())
                 .referenceLink(dto.getReferenceLink())
-                .attachmentUrl(fileUrl)
+                .attachmentUrl(fileUrl) // 여기에 저장
                 .requestedAt(LocalDateTime.now())
                 .processedAt(null)
                 .requestAdminStatusCodeId(1)
@@ -85,6 +71,7 @@ public class MembertypeChangeService {
 
         membertypeChangeRepository.save(entity);
     }
+
 
     @Transactional
     public void processRequest(Integer requestId, String statusCode) {
