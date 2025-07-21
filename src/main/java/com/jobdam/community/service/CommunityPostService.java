@@ -15,6 +15,7 @@ import com.jobdam.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.jobdam.community.dto.MyCommunityPostResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -159,7 +160,9 @@ public class CommunityPostService {
                 .build();
     }
 
-
+    public List<MyCommunityPostResponseDto> getMyPosts(Integer userId) {
+        return communityPostRepository.findMyCommunityPosts(userId);
+    }
 
 }
 

@@ -11,6 +11,7 @@ import com.jobdam.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.jobdam.sns.dto.MySnsCommentResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -87,5 +88,10 @@ public class SnsCommentServiceImpl implements SnsCommentService {
         }
 
         snsCommentRepository.delete(comment);
+    }
+
+    @Override
+    public List<MySnsCommentResponseDto> getMyComments(Integer userId) {
+        return snsCommentRepository.findMySnsComments(userId);
     }
 }
