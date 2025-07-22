@@ -39,6 +39,12 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 20000
 
   data:
     mongodb:
@@ -63,6 +69,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
+  access-token-validity: 300000      # 5 minutes in milliseconds
+  refresh-token-validity: 1209600000  # 2 weeks in milliseconds
 
 management:
   endpoints:

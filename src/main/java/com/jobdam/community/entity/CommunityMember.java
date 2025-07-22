@@ -41,6 +41,10 @@ public class CommunityMember {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id", insertable = false, updatable = false)
+    private Community community;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_member_role_code_id", insertable = false, updatable = false)
     private CommunityMemberRoleCode communityMemberRoleCode;
 }
