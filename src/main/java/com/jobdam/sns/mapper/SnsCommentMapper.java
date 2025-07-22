@@ -26,8 +26,19 @@ public class SnsCommentMapper {
         dto.setUserId(entity.getUserId());
         dto.setNickname(user != null ? user.getNickname() : "알 수 없음");
         dto.setContent(entity.getContent());
+
+        dto.setProfileImageUrl(
+                user != null ? user.getProfileImageUrl() : null
+        );
+
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
+        dto.setBoardStatusCode(
+                entity.getBoardStatusCode() != null
+                        ? entity.getBoardStatusCode().getCode()
+                        : null
+        );
+
         return dto;
     }
 }

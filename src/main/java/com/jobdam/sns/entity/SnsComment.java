@@ -1,5 +1,6 @@
 package com.jobdam.sns.entity;
 
+import com.jobdam.code.entity.BoardStatusCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,10 @@ public class SnsComment {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(name = "board_status_code_id", nullable = false)
+    private Integer boardStatusCodeId;
+
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -46,5 +51,9 @@ public class SnsComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sns_post_id", insertable = false, updatable = false)
     private SnsPost snsPost;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_status_code_id", insertable = false, updatable = false)
+    private BoardStatusCode boardStatusCode;
 
 }

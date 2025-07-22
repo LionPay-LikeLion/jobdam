@@ -172,10 +172,6 @@ public class CommunityPostService {
                 .build();
     }
 
-    public List<MyCommunityPostResponseDto> getMyPosts(Integer userId) {
-        return communityPostRepository.findMyCommunityPosts(userId);
-    }
-
 }
 
 

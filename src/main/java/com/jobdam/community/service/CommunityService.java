@@ -220,12 +220,14 @@ public class CommunityService {
                                         .orElse(null)
                         )
                         .ownerNickname(c.getUser().getNickname())
+                        .ownerProfileImageUrl(c.getUser().getProfileImageUrl())   // ⭐️ 추가!
                         .maxMember(c.getMaxMember())
                         .currentMember(c.getCurrentMember())
                         .enterPoint(c.getEnterPoint())
                         .profileImageUrl(c.getProfileImageUrl())
                         .build()
                 )
+
                 .collect(Collectors.toList());
     }
 
@@ -244,6 +246,7 @@ public class CommunityService {
                                         .orElse(null)
                         )
                         .ownerNickname(c.getUser().getNickname())
+                        .ownerProfileImageUrl(c.getUser().getProfileImageUrl()) // ⭐️ 이 줄 추가!
                         .maxMember(c.getMaxMember())
                         .currentMember(c.getCurrentMember())
                         .enterPoint(c.getEnterPoint())
@@ -252,6 +255,7 @@ public class CommunityService {
                 )
                 .collect(Collectors.toList());
     }
+
 
     public List<CommunityListResponseDto> getCommunitiesByMemberUserId(Integer userId) {
         List<CommunityMember> memberList = communityMemberRepository.findByUserUserId(userId);
@@ -265,6 +269,7 @@ public class CommunityService {
                             .description(c.getDescription())
                             .subscriptionLevelCode(c.getSubscriptionLevelCode().getCode())
                             .ownerNickname(c.getUser().getNickname())
+                            .ownerProfileImageUrl(c.getUser().getProfileImageUrl())   // ⭐️ 추가!
                             .maxMember(c.getMaxMember())
                             .currentMember(c.getCurrentMember())
                             .enterPoint(c.getEnterPoint())

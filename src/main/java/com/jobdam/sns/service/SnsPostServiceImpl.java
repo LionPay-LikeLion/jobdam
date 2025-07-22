@@ -64,6 +64,13 @@ public class SnsPostServiceImpl implements SnsPostService {
                             ? post.getUser().getMemberTypeCode().getCode()
                             : null
             );
+
+            dto.setBoardStatusCode(
+                    post.getBoardStatusCode() != null
+                            ? post.getBoardStatusCode().getCode()
+                            : null
+            );
+
             dto.setSubscriptionLevelCode(post.getUser().getSubscriptionLevelCode().getCode());
             return dto;
 
@@ -92,6 +99,11 @@ public class SnsPostServiceImpl implements SnsPostService {
             dto.setMemberTypeCode(
                     post.getUser().getMemberTypeCode() != null
                             ? post.getUser().getMemberTypeCode().getCode()
+                            : null
+            );
+            dto.setBoardStatusCode(
+                    post.getBoardStatusCode() != null
+                            ? post.getBoardStatusCode().getCode()
                             : null
             );
             return dto;
@@ -144,6 +156,7 @@ public class SnsPostServiceImpl implements SnsPostService {
                 .commentCount(commentCount)
                 .liked(liked)
                 .bookmarked(bookmarked)
+                .profileImageUrl(post.getUser().getProfileImageUrl())
                 .build();
     }
 
@@ -193,12 +206,14 @@ public class SnsPostServiceImpl implements SnsPostService {
         post.setUserId(userId);
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
-        post.setImageUrl(imageUrl);        // 저장된 경로 (null 가능)
-        post.setAttachmentUrl(attachmentUrl); // 저장된 경로 (null 가능)
+        post.setImageUrl(imageUrl);
+        post.setAttachmentUrl(attachmentUrl);
+        post.setBoardStatusCodeId(1);  // <-- **여기 추가**
 
         snsPostRepository.save(post);
         return post.getSnsPostId();
     }
+
 
     @Override
     @Transactional
@@ -236,8 +251,12 @@ public class SnsPostServiceImpl implements SnsPostService {
             throw new RuntimeException("본인만 삭제할 수 있습니다.");
         }
 
-        snsPostRepository.delete(post);
+        // *** 소프트 딜리트 처리 ***
+        post.setBoardStatusCodeId(2);  // 2: 삭제
+        snsPostRepository.save(post);
     }
+
+
     @Override
     @Transactional(readOnly = true)
     public List<SnsPostResponseDto> getFilteredPosts(SnsPostFilterDto filter, Integer currentUserId) {
@@ -266,7 +285,7 @@ public class SnsPostServiceImpl implements SnsPostService {
                         likeRepository.countBySnsPostId(post.getSnsPostId()),
                         snsCommentRepository.countBySnsPostId(post.getSnsPostId()),
                         likeRepository.existsByUserIdAndSnsPostId(userId, post.getSnsPostId()),
-                        bookmarkRepository.existsByUserIdAndSnsPostId(userId, post.getSnsPostId())
+                        (bookmarkRepository.existsByUserIdAndSnsPostId(userId, post.getSnsPostId()))
                 ))
                 .collect(Collectors.toList());
     }
