@@ -3,6 +3,7 @@ package com.jobdam.sns.controller;
 import com.jobdam.common.util.CustomUserDetails;
 import com.jobdam.sns.dto.SnsCommentRequestDto;
 import com.jobdam.sns.dto.SnsCommentResponseDto;
+import com.jobdam.sns.dto.SnsCommentUpdateRequestDto;
 import com.jobdam.sns.service.SnsCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ public class SnsCommentController {
 
     @PutMapping("/{commentId}")
     public void updateComment(@PathVariable Integer commentId,
-                              @RequestBody SnsCommentRequestDto requestDto,
+                              @RequestBody SnsCommentUpdateRequestDto requestDto,
                               @AuthenticationPrincipal CustomUserDetails user) {
         snsCommentService.updateComment(commentId, requestDto, user.getUserId());
     }

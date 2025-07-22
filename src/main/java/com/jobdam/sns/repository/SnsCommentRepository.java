@@ -21,13 +21,15 @@ public interface SnsCommentRepository extends JpaRepository<SnsComment, Integer>
         c.snsCommentId,
         c.snsPost.snsPostId,
         c.content,
+        b.code,
         c.createdAt,
         c.updatedAt
     )
     FROM SnsComment c
+    LEFT JOIN c.boardStatusCode b
     WHERE c.user.userId = :userId
     ORDER BY c.createdAt DESC
-""")
+    """)
     List<MySnsCommentResponseDto> findMySnsComments(@Param("userId") Integer userId);
 
 }

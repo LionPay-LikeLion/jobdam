@@ -10,9 +10,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MyCommunityPostResponseDto {
+
     private Integer postId;
     private String title;
     private Integer viewCount;
     private Long commentCount;
     private LocalDateTime createdAt;
+
 }

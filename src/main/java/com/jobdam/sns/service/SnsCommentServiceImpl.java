@@ -2,6 +2,7 @@ package com.jobdam.sns.service;
 
 import com.jobdam.sns.dto.SnsCommentRequestDto;
 import com.jobdam.sns.dto.SnsCommentResponseDto;
+import com.jobdam.sns.dto.SnsCommentUpdateRequestDto;
 import com.jobdam.sns.entity.SnsComment;
 import com.jobdam.user.entity.User;
 import com.jobdam.sns.entity.SnsPost;
@@ -36,8 +37,10 @@ public class SnsCommentServiceImpl implements SnsCommentService {
             dto.setUserId(comment.getUserId());
             dto.setNickname(comment.getUser().getNickname());
             dto.setContent(comment.getContent());
+            dto.setProfileImageUrl(comment.getUser().getProfileImageUrl());
             dto.setCreatedAt(comment.getCreatedAt());
             dto.setUpdatedAt(comment.getUpdatedAt());
+            dto.setBoardStatusCode(comment.getBoardStatusCode().getCode());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -56,14 +59,16 @@ public class SnsCommentServiceImpl implements SnsCommentService {
         comment.setUserId(userId);
         comment.setContent(requestDto.getContent());
         comment.setCreatedAt(LocalDateTime.now());
+        comment.setBoardStatusCodeId(1); // <-- **여기 추가**
 
         snsCommentRepository.save(comment);
         return comment.getSnsCommentId();
     }
 
+
     @Override
     @Transactional
-    public void updateComment(Integer commentId, SnsCommentRequestDto requestDto, Integer userId) {
+    public void updateComment(Integer commentId, SnsCommentUpdateRequestDto requestDto, Integer userId) {
         SnsComment comment = snsCommentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
@@ -87,7 +92,9 @@ public class SnsCommentServiceImpl implements SnsCommentService {
             throw new RuntimeException("You are not the owner of this comment.");
         }
 
-        snsCommentRepository.delete(comment);
+        comment.setBoardStatusCodeId(2);
+
+        snsCommentRepository.save(comment);
     }
 
     @Override

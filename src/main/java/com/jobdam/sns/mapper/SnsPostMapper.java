@@ -33,6 +33,11 @@ public class SnsPostMapper {
         dto.setCommentCount(commentCount);
         dto.setLiked(isLiked);
         dto.setBookmarked(isBookmarked);
+
+        dto.setProfileImageUrl(
+                user != null ? user.getProfileImageUrl() : null
+        );
+
         dto.setSubscriptionLevelCode(
                 user != null && user.getSubscriptionLevelCode() != null
                         ? user.getSubscriptionLevelCode().getCode()
@@ -42,6 +47,11 @@ public class SnsPostMapper {
         dto.setMemberTypeCode(user != null && user.getMemberTypeCode() != null
                 ? user.getMemberTypeCode().getCode()
                 : null);
+
+        dto.setBoardStatusCode(
+                post.getBoardStatusCode() != null
+                        ? post.getBoardStatusCode().getCode()
+                        : null);
 
         return dto;
     }

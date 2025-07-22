@@ -22,7 +22,8 @@ public class SnsPostResponseDto {
     private int commentCount;
     private String memberTypeCode;
     private String subscriptionLevelCode;
-
+    private String boardStatusCode;
+    private String profileImageUrl;
 
     private boolean isLiked;
     private boolean isBookmarked;

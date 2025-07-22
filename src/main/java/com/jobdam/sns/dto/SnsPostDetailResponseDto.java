@@ -18,6 +18,8 @@ public class SnsPostDetailResponseDto {
     private LocalDateTime createdAt;
     private int likeCount;
     private int commentCount;
+    private String boardStatusCode;
+    private String profileImageUrl;
     private boolean liked;
     private boolean bookmarked;
 }

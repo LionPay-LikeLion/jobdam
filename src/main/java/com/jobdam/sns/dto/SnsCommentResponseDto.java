@@ -15,6 +15,8 @@ public class SnsCommentResponseDto {
     private Integer userId;
     private String nickname;
     private String content;
+    private String boardStatusCode;
+    private String profileImageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
