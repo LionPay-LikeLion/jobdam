@@ -65,12 +65,6 @@ CREATE TABLE payment_status_code (
   name VARCHAR(30) NOT NULL
 );
 
-CREATE TABLE ai_feedback_type_code (
-  ai_feedback_type_code_id INT PRIMARY KEY AUTO_INCREMENT,
-  code VARCHAR(30) NOT NULL UNIQUE,
-  name VARCHAR(50) NOT NULL
-);
-
 CREATE TABLE report_type_code (
   report_type_code_id INT PRIMARY KEY AUTO_INCREMENT,
   code VARCHAR(20) NOT NULL UNIQUE,
@@ -158,7 +152,8 @@ CREATE TABLE user (
   profile_image_url VARCHAR(255),
   provider_id VARCHAR(255) DEFAULT NULL COMMENT 'OAuth provider unique ID (e.g., Google sub)',
   provider_type VARCHAR(50) DEFAULT NULL COMMENT 'OAuth provider name (e.g., GOOGLE, KAKAO, LOCAL)',
-  email_verified BOOLEAN DEFAULT FALSE COMMENT 'Whether the user\'s email is verified',
+  email_verified BOOLEAN DEFAULT FALSE COMMENT 'Whether the user\'s email is verified'',
+  is_active BOOLEAN DEFAULT TRUE,
   FOREIGN KEY (subscription_level_code_id) REFERENCES subscription_level_code(subscription_level_code_id),
   FOREIGN KEY (role_code_id) REFERENCES role_code(role_code_id),
   FOREIGN KEY (member_type_code_id) REFERENCES member_type_code(member_type_code_id)
@@ -166,7 +161,7 @@ CREATE TABLE user (
 
 
 
--- 2. membership_change
+2. membership_change
 CREATE TABLE membertype_change (
   membertype_change_id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -362,23 +357,6 @@ CREATE TABLE payment (
   FOREIGN KEY (payment_type_code_id) REFERENCES payment_type_code(payment_type_code_id),
   FOREIGN KEY (payment_status_code_id) REFERENCES payment_status_code(payment_status_code_id)
 );
-
-
-
--- 15. ai_feedback
-CREATE TABLE ai_feedback (
-  ai_feedback_id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  ai_feedback_type_code_id INT NOT NULL,    
-  input_text TEXT NOT NULL,
-  output_text TEXT NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,            
-  FOREIGN KEY (user_id) REFERENCES user(user_id),
-  FOREIGN KEY (ai_feedback_type_code_id) REFERENCES ai_feedback_type_code(ai_feedback_type_code_id)
-);
-
-
-
 
 -- 16. message
 CREATE TABLE message (
