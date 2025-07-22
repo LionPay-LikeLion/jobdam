@@ -57,7 +57,7 @@ public class AuthService {
 
         // 활동 정지 계정 로그인 차단
         if (user.getIsActive() != null && !user.getIsActive()) {
-            throw new IllegalArgumentException("활동 정지된 계정입니다. 관리자에게 문의하세요.");
+            throw new IllegalArgumentException("탈퇴 또는 정지된 계정입니다. 관리자에게 문의하세요.");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {

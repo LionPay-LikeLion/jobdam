@@ -1,10 +1,14 @@
 
 server:
-  port: # 8081
+ # port: 8081
   forward-headers-strategy: framework
 
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
@@ -37,6 +41,11 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER_CLASS_NAME}
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+
   jpa:
     hibernate:
       ddl-auto: none  # in development (auto table create/modify)

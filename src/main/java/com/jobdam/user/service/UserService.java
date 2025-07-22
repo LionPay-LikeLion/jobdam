@@ -1,8 +1,8 @@
 package com.jobdam.user.service;
 
+import com.jobdam.common.service.FileService;
 import com.jobdam.common.util.JwtProvider;
-import com.jobdam.user.dto.LoginResponseDto;
-import com.jobdam.user.dto.OAuthRegisterRequestDto;
+import com.jobdam.user.dto.*;
 
 import com.jobdam.code.entity.MemberTypeCode;
 import com.jobdam.code.entity.RoleCode;
@@ -10,22 +10,30 @@ import com.jobdam.code.entity.SubscriptionLevelCode;
 import com.jobdam.code.repository.MemberTypeCodeRepository;
 import com.jobdam.code.repository.RoleCodeRepository;
 import com.jobdam.code.repository.SubscriptionLevelCodeRepository;
-import com.jobdam.user.dto.UserProfileDto;
 import com.jobdam.user.entity.User;
 import com.jobdam.user.repository.UserRepository;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsResource;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.jobdam.user.dto.ChangePasswordRequestDto;
-import com.jobdam.user.dto.ChangePasswordRequestDto;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +44,7 @@ public class UserService {
     private final RoleCodeRepository roleCodeRepository;
     private final MemberTypeCodeRepository memberTypeCodeRepository;
     private final JwtProvider jwtProvider;
+    private final FileService fileService;
 
     public UserProfileDto getUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
@@ -53,11 +62,14 @@ public class UserService {
                 .map(MemberTypeCode::getCode)
                 .orElse("GENERAL");
 
+
+
         return UserProfileDto.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .remainingPoints(user.getPoint())
+                .roleCodeId(user.getRoleCodeId())
                 .subscriptionLevel(subscriptionLevel)
                 .role(role)
                 .phone(user.getPhone())
@@ -71,27 +83,13 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-        String fileUrl = null;
         if (image != null && !image.isEmpty()) {
-            String rootPath = System.getProperty("user.dir");
-            String uploadDir = rootPath + File.separator + "uploads" + File.separator + "user" + File.separator + userId + File.separator;
-            File folder = new File(uploadDir);
-            if (!folder.exists()) folder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-            File dest = new File(uploadDir + fileName);
-
-            try {
-                image.transferTo(dest);
-                fileUrl = "/uploads/user/" + userId + "/" + fileName;
-            } catch (IOException | IllegalStateException e) {
-                e.printStackTrace();
-                throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
-            }
+            String fileId = fileService.saveFile(image);
+            user.setProfileImageUrl("/api/files/" + fileId);  // <<<<<<<<<< 여기만 수정!
+            userRepository.save(user);
         }
-
-        user.setProfileImageUrl(fileUrl);
-        userRepository.save(user);
     }
+
 
     public void withdrawUser(Integer userId) {
         User user = userRepository.findById(userId)
@@ -199,4 +197,26 @@ public class UserService {
 
         return new LoginResponseDto(accessToken, refreshToken, profile);
     }
+
+    public List<UserSearchResponseDto> searchUsersByNickname(String keyword, Integer excludeUserId) {
+        List<User> users = userRepository.findByNicknameContainingIgnoreCaseAndUserIdNot(
+                keyword, excludeUserId, PageRequest.of(0, 10)
+        );
+
+        return users.stream()
+                .map(user -> UserSearchResponseDto.builder()
+                        .userId(user.getUserId())
+                        .nickname(user.getNickname())
+                        .profileImageUrl(user.getProfileImageUrl())
+                        .subscriptionLevelCode(user.getSubscriptionLevelCode() != null ? user.getSubscriptionLevelCode().getCode() : null)
+                        .memberTypeCode(user.getMemberTypeCode() != null ? user.getMemberTypeCode().getCode() : null)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public GridFsResource loadProfileImage(String fileId) {
+        return fileService.loadFile(fileId);
+    }
+
 }
+
