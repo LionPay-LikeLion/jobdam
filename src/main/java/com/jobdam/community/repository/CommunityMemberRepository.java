@@ -5,6 +5,7 @@ import com.jobdam.community.entity.CommunityMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CommunityMemberRepository extends JpaRepository<CommunityMember, Integer> {
 
@@ -12,6 +13,6 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
 
     boolean existsByCommunityIdAndUserId(Integer communityId, Integer userId);
     boolean existsByUserIdAndCommunityId(Integer userId, Integer communityId);
-
+    Optional<CommunityMember> findByCommunityIdAndUserId(Integer communityId, Integer userId);
     Integer countByCommunityId(Integer communityId);
 }
