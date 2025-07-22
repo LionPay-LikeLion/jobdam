@@ -1,8 +1,6 @@
-
 server:
 
- # port: 8081
-
+  # port: 8081
 
 spring:
   servlet:
@@ -54,7 +52,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none  # in development (auto table create/modify)
+      ddl-auto: none # in development (auto table create/modify)
       # ddl-auto: none  # in operation (manual sql management)
     show-sql: true
   mail:
@@ -71,8 +69,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity: 300000      # 5 minutes in milliseconds
-  refresh-token-validity: 1209600000  # 2 weeks in milliseconds
+  access-token-validity: 300000 # 5 minutes in milliseconds
+  refresh-token-validity: 1209600000 # 2 weeks in milliseconds
 
 management:
   endpoints:
@@ -88,7 +86,7 @@ management:
         enabled: true
 port-one:
   base-url: ${PORTONE_BASE_URL}
-  api-key:    ${PORTONE_API_KEY}
+  api-key: ${PORTONE_API_KEY}
   api-secret: ${PORTONE_API_SECRET}
   customer-code: ${PORTONE_CUSTOMER_CODE}
   test-mode: false
