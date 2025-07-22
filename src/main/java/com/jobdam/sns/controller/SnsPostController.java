@@ -34,9 +34,9 @@ public class SnsPostController {
     @GetMapping("/search")
     public ResponseEntity<List<SnsPostResponseDto>> searchPosts(
             @Parameter(description = "검색 키워드 (제목 또는 본문 기준)") @RequestParam String keyword,
-            @RequestParam(required = false) Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        List<SnsPostResponseDto> results = snsPostService.searchPostsByKeyword(keyword, userId);
+        List<SnsPostResponseDto> results = snsPostService.searchPostsByKeyword(keyword, user.getUserId());
         return ResponseEntity.ok(results);
     }
 
@@ -47,9 +47,9 @@ public class SnsPostController {
     @GetMapping("/filter")
     public List<SnsPostResponseDto> getFilteredPosts(
             @ModelAttribute SnsPostFilterDto filter,
-            @RequestParam Integer userId
+            @AuthenticationPrincipal CustomUserDetails user
     ) {
-        return snsPostService.getFilteredPosts(filter, userId);
+        return snsPostService.getFilteredPosts(filter, user.getUserId());
     }
 
 

@@ -9,20 +9,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserProfileDto {
+public class UserSearchResponseDto {
 
     private Integer userId;
-    private String email;
     private String nickname;
     private Integer remainingPoints;
-    private String subscriptionLevel;
-    private String role;
-    private String phone;
+    private String subscriptionLevelCode;
     private String profileImageUrl;
     private String memberTypeCode;
-    private LocalDateTime createdAt;
-    private Integer roleCodeId;
-
 
 }
-
