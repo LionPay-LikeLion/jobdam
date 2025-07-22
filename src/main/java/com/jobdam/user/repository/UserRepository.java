@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByProviderId(String providerId);
 
+    Optional<User> findByProviderIdAndProviderType(String providerId, String providerType);
+
     Optional<User> findByEmailAndMemberTypeCodeId(String email, Integer memberTypeCodeId);
 
     List<User> findByNicknameContainingIgnoreCaseAndUserIdNot(String keyword, Integer excludeUserId, PageRequest of);

@@ -303,7 +303,9 @@ CREATE TABLE sns_post (
   image_url VARCHAR(255),
   attachment_url VARCHAR(255),
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES user(user_id)
+  board_status_code_id INT NOT NULL DEFAULT 1,
+  FOREIGN KEY (user_id) REFERENCES user(user_id),
+  FOREIGN KEY (board_status_code_id) REFERENCES board_status_code(board_status_code_id)
 );
 
 
@@ -315,8 +317,10 @@ CREATE TABLE sns_comment (
   content TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  board_status_code_id INT NOT NULL DEFAULT 1,
   FOREIGN KEY (sns_post_id) REFERENCES sns_post(sns_post_id),
   FOREIGN KEY (user_id) REFERENCES user(user_id)
+  FOREIGN KEY (board_status_code_id) REFERENCES board_status_code(board_status_code_id)
 );
 
 

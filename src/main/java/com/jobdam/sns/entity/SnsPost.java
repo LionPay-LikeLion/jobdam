@@ -1,5 +1,6 @@
 package com.jobdam.sns.entity;
 
+import com.jobdam.code.entity.BoardStatusCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -40,6 +41,10 @@ public class SnsPost {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "board_status_code_id", nullable = false)
+    private Integer boardStatusCodeId;
+
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -53,4 +58,8 @@ public class SnsPost {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_status_code_id", insertable = false, updatable = false)
+    private BoardStatusCode boardStatusCode;
 }

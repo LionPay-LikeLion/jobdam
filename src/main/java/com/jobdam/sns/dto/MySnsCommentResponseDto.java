@@ -1,18 +1,19 @@
 package com.jobdam.sns.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MySnsCommentResponseDto {
     private Integer commentId;
     private Integer postId;
     private String content;
+    private String boardStatusCode;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

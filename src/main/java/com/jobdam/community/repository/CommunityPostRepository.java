@@ -33,20 +33,6 @@ public interface CommunityPostRepository extends JpaRepository<CommunityPost, In
 
     );
 
-    @Query("""
-    SELECT new com.jobdam.community.dto.MyCommunityPostResponseDto(
-        p.communityPostId,
-        p.title,
-        p.viewCount,
-        (SELECT COUNT(c) FROM CommunityComment c WHERE c.communityPost.communityPostId = p.communityPostId),
-        p.createdAt
-    )
-    FROM CommunityPost p
-    WHERE p.user.userId = :userId
-    ORDER BY p.createdAt DESC
-""")
-    List<MyCommunityPostResponseDto> findMyCommunityPosts(@Param("userId") Integer userId);
-
 
 }
 
