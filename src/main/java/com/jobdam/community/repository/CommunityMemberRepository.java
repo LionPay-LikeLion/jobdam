@@ -13,5 +13,7 @@ public interface CommunityMemberRepository extends JpaRepository<CommunityMember
     boolean existsByCommunityIdAndUserId(Integer communityId, Integer userId);
     boolean existsByUserIdAndCommunityId(Integer userId, Integer communityId);
 
+    List<CommunityMember> findByUserUserId(Integer userId);
+
     Integer countByCommunityId(Integer communityId);
 }
