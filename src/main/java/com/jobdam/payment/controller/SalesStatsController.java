@@ -1,4 +1,3 @@
-// src/main/java/com/jobdam/payment/controller/SalesStatsController.java
 package com.jobdam.payment.controller;
 
 import com.jobdam.payment.dto.SalesStatsDailyDto;
@@ -28,13 +27,13 @@ public class SalesStatsController {
         return statsService.getMonthlyStats();
     }
 
-    // 일별 전체 결제금액(결제수단 구분X)
+    // 일별 전체 결제금액(결제수단 구분X, 프론트 일별 전체매출 탭)
     @GetMapping("/daily/total")
     public List<SalesStatsDailyDto> getDailyTotalStats() {
         return statsService.getDailyTotalStats();
     }
 
-    // 월별 전체 결제금액(결제수단 구분X)
+    // 월별 전체 결제금액(결제수단 구분X, 프론트 월별 전체매출 탭)
     @GetMapping("/monthly/total")
     public List<SalesStatsMonthlyDto> getMonthlyTotalStats() {
         return statsService.getMonthlyTotalStats();
