@@ -69,6 +69,7 @@ public class UserService {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .remainingPoints(user.getPoint())
+                .roleCodeId(user.getRoleCodeId())
                 .subscriptionLevel(subscriptionLevel)
                 .role(role)
                 .phone(user.getPhone())
