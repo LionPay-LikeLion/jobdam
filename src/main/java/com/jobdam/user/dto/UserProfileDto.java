@@ -21,6 +21,8 @@ public class UserProfileDto {
     private String profileImageUrl;
     private String memberTypeCode;
     private LocalDateTime createdAt;
+    private Integer roleCodeId;
+
 
 }
 
