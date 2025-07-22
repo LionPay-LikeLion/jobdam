@@ -150,3 +150,6 @@ application.properties
 .env.*
 
 !src/main/resources/application.yml
+
+# Claude Code configuration
+CLAUDE.md

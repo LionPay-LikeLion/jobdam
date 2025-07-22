@@ -31,74 +31,119 @@ public class CommunityAdminManageController {
             @PathVariable Integer communityId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        // 1. 커뮤니티 기본정보 조회
-        Community community = communityRepository.findById(communityId)
-                .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
+        // 1. 파라미터 및 인증 체크
+        if (communityId == null) {
+            return ResponseEntity.badRequest().body("communityId required");
+        }
+        if (user == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
 
-        // 2. 소유자 체크
-        if (!community.getUserId().equals(user.getUserId())) {
+        // 2. 커뮤니티 정보
+        Community community = communityRepository.findById(communityId)
+                .orElse(null);
+        if (community == null) {
+            return ResponseEntity.status(404).body("커뮤니티를 찾을 수 없습니다.");
+        }
+
+        // 3. 소유자 체크
+        if (!Objects.equals(community.getUserId(), user.getUserId())) {
             return ResponseEntity.status(403).body("접근 권한이 없습니다.");
         }
 
-        // 3. 멤버 리스트 (강제퇴장/rejoin 불가 등 플래그는 프론트에서 처리)
+        // 4. 멤버 리스트
         List<CommunityMember> memberList = communityMemberRepository.findByCommunityId(communityId);
+        List<Map<String, Object>> members = new ArrayList<>();
+        for (CommunityMember m : memberList) {
+            Map<String, Object> member = new HashMap<>();
+            member.put("userId", m.getUserId());
+            member.put("nickname", m.getUser() != null ? m.getUser().getNickname() : "");
+            member.put("profileImageUrl", m.getUser() != null ? m.getUser().getProfileImageUrl() : "");
+            member.put("role", m.getCommunityMemberRoleCode() != null ? m.getCommunityMemberRoleCode().getCode() : null);
+            member.put("joinedAt", m.getJoinedAt());
+            members.add(member);
+        }
 
-        // 4. 게시판 리스트
+
+
+
+        // 5. 게시판 리스트
         List<CommunityBoard> boardList = communityBoardRepository.findAllByCommunityIdOrderByCreatedAtDesc(communityId);
+        List<Map<String, Object>> boards = new ArrayList<>();
+        for (CommunityBoard b : boardList) {
+            Map<String, Object> board = new HashMap<>();
+            board.put("boardId", b.getCommunityBoardId());
+            board.put("name", b.getName());
+            board.put("description", b.getDescription());
+            board.put("type", b.getBoardTypeCode() != null ? b.getBoardTypeCode().getCode() : null);
+            board.put("status", b.getBoardStatusCode() != null ? b.getBoardStatusCode().getCode() : null);
+            boards.add(board);
+        }
 
-        // 5. 플랜 정보 (최근 프리미엄 구독)
+        // 6. 플랜 정보(구독 등급, 만료일 등)
         CommunitySubscription plan = communitySubscriptionRepository.findAll().stream()
-                .filter(s -> s.getCommunityId().equals(communityId))
+                .filter(s -> Objects.equals(s.getCommunityId(), communityId))
                 .sorted((a, b) -> b.getStartDate().compareTo(a.getStartDate()))
                 .findFirst()
                 .orElse(null);
 
-        // 6. 데이터 조합
+        Map<String, Object> planMap = new LinkedHashMap<>();
+        planMap.put("levelCode", community.getSubscriptionLevelCode() != null ? community.getSubscriptionLevelCode().getCode() : null);
+        planMap.put("levelName", community.getSubscriptionLevelCode() != null ? community.getSubscriptionLevelCode().getName() : null);
+        if (plan != null) {
+            planMap.put("startDate", plan.getStartDate());
+            planMap.put("endDate", plan.getEndDate());
+            planMap.put("paidPoint", plan.getPaidPoint());
+        }
+
+
+
+
+
+        // 7. 전체 결과 조립
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("communityId", community.getCommunityId());
         result.put("name", community.getName());
         result.put("description", community.getDescription());
-        result.put("ownerNickname", community.getUser().getNickname());
+        result.put("ownerNickname", community.getUser() != null ? community.getUser().getNickname() : "");
         result.put("currentMember", community.getCurrentMember());
         result.put("maxMember", community.getMaxMember());
         result.put("enterPoint", community.getEnterPoint());
-        result.put("subscriptionLevelCode", community.getSubscriptionLevelCode().getCode());
+        result.put("subscriptionLevelCode", community.getSubscriptionLevelCode() != null ? community.getSubscriptionLevelCode().getCode() : null);
         result.put("profileImageUrl", community.getProfileImageUrl());
 
-        // 멤버 리스트 뽑기
-        result.put("members", memberList.stream().map(m -> Map.of(
-                "userId", m.getUserId(),
-                "nickname", m.getUser().getNickname(),
-                "profileImageUrl", m.getUser().getProfileImageUrl(),
-                "role", m.getCommunityMemberRoleCode().getCode(),
-                "joinedAt", m.getJoinedAt()
-        )).toList());
-
-        // 게시판 리스트 뽑기
-        result.put("boards", boardList.stream().map(b -> Map.of(
-                "boardId", b.getCommunityBoardId(),
-                "name", b.getName(),
-                "description", b.getDescription(),
-                "type", b.getBoardTypeCode().getCode(),
-                "status", b.getBoardStatusCode().getCode()
-        )).toList());
-
-        // 플랜 정보 (구독등급/만료일 등)
-        if (plan != null) {
-            result.put("plan", Map.of(
-                    "levelCode", community.getSubscriptionLevelCode().getCode(),
-                    "levelName", community.getSubscriptionLevelCode().getName(),
-                    "startDate", plan.getStartDate(),
-                    "endDate", plan.getEndDate(),
-                    "paidPoint", plan.getPaidPoint()
-            ));
-        } else {
-            result.put("plan", Map.of(
-                    "levelCode", community.getSubscriptionLevelCode().getCode(),
-                    "levelName", community.getSubscriptionLevelCode().getName()
-            ));
-        }
+        result.put("members", members);
+        result.put("boards", boards);
+        result.put("plan", planMap);
 
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/manage/kick/{targetUserId}")
+    public ResponseEntity<?> kickMember(
+            @PathVariable Integer communityId,
+            @PathVariable Integer targetUserId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        // 커뮤니티/인증/권한 체크
+        Community community = communityRepository.findById(communityId).orElse(null);
+        if (community == null) return ResponseEntity.status(404).body("커뮤니티를 찾을 수 없습니다.");
+        if (user == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        if (!Objects.equals(community.getUserId(), user.getUserId()))
+            return ResponseEntity.status(403).body("OWNER만 강퇴 가능");
+
+        // 본인(OWNER) 자기 자신은 강퇴 불가
+        if (Objects.equals(user.getUserId(), targetUserId))
+            return ResponseEntity.badRequest().body("운영자는 자신을 강퇴할 수 없습니다.");
+
+        // 강퇴 대상 존재 확인
+        CommunityMember targetMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, targetUserId)
+                .orElse(null);
+        if (targetMember == null) return ResponseEntity.status(404).body("해당 멤버가 없습니다.");
+
+        // 실제 삭제(강퇴)
+        communityMemberRepository.delete(targetMember);
+
+        return ResponseEntity.ok("success");
     }
 }
