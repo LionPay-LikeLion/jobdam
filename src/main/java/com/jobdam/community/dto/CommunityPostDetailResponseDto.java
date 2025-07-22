@@ -21,5 +21,6 @@ public class CommunityPostDetailResponseDto {
     private Integer viewCount;
     private String postTypeCode;
     private String userProfileImageUrl;
+    private String boardStatusCode;
 
 }

@@ -16,9 +16,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.jobdam.community.dto.MyCommunityPostResponseDto;
+import com.jobdam.code.entity.BoardStatusCode;
+import com.jobdam.code.repository.BoardStatusCodeRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,8 @@ public class CommunityPostService {
     private final CommunityCommentRepository communityCommentRepository;
     private final CommunityBoardRepository communityBoardRepository;
     private final PostTypeCodeRepository postTypeCodeRepository;
+    private final BoardStatusCodeRepository boardStatusCodeRepository;
+
 
     @Transactional
     public List<CommunityPostListResponseDto> getPostsByBoard(Integer boardId, String postTypeCode, String keyword) {
@@ -65,6 +70,7 @@ public class CommunityPostService {
                             .commentCount(commentCount)
                             .viewCount(post.getViewCount())
                             .postTypeCode(post.getPostTypeCode().getCode())
+                            .boardStatusCode(post.getBoardStatusCode().getCode())
                             .build();
                 })
                 .toList();
@@ -79,6 +85,8 @@ public class CommunityPostService {
         PostTypeCode postTypeCode = postTypeCodeRepository.findByCode(dto.getPostTypeCode())
                 .orElseThrow(() -> new RuntimeException("게시판 타입을 찾을 수 없습니다."));
 
+        BoardStatusCode statusCode = boardStatusCodeRepository.findById(1)
+                .orElseThrow(() -> new RuntimeException("게시글 상태 코드를 찾을 수 없습니다."));
 
 
         CommunityPost post = CommunityPost.builder()
@@ -86,7 +94,7 @@ public class CommunityPostService {
                 .content(dto.getContent())
                 .communityBoardId(communityBoardId)
                 .postTypeCodeId(postTypeCode.getPostTypeCodeId())
-                .boardStatusCodeId(1)
+                .boardStatusCode(statusCode)
                 .viewCount(0)
                 .userId(userId)
                 .build();
@@ -129,10 +137,13 @@ public class CommunityPostService {
             throw new RuntimeException("작성자만 삭제할 수 있습니다.");
         }
 
+        BoardStatusCode deletedStatus = boardStatusCodeRepository.findById(2)
+                .orElseThrow(() -> new RuntimeException("게시글 상태 코드를 찾을 수 없습니다."));
 
-        int DELETED_STATUS_CODE_ID = 2;
-        post.setBoardStatusCodeId(DELETED_STATUS_CODE_ID);
 
+        //int DELETED_STATUS_CODE_ID = 2;
+
+        post.setBoardStatusCode(deletedStatus);
         post.setUpdatedAt(LocalDateTime.now());
 
     }
@@ -157,6 +168,7 @@ public class CommunityPostService {
                 .commentCount(commentCount) // 이렇게 주입!
                 .viewCount(post.getViewCount())
                 .postTypeCode(post.getPostTypeCode().getCode())
+                .boardStatusCode(post.getBoardStatusCode().getCode())
                 .build();
     }
 

@@ -4,6 +4,7 @@ import com.jobdam.code.entity.PostTypeCode;
 import com.jobdam.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import com.jobdam.code.entity.BoardStatusCode;
 
 import java.time.LocalDateTime;
 
@@ -44,8 +45,8 @@ public class CommunityPost {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "board_status_code_id", nullable = false)
-    private Integer boardStatusCodeId;
+   // @Column(name = "board_status_code_id", nullable = false)
+    //private Integer boardStatusCodeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
@@ -66,5 +67,9 @@ public class CommunityPost {
         this.updatedAt = LocalDateTime.now();
     }
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_status_code_id")
+    private BoardStatusCode boardStatusCode;
 
 }

@@ -46,4 +46,6 @@ public class SnsCommentController {
     public List<MySnsCommentResponseDto> getMyComments(@AuthenticationPrincipal CustomUserDetails user) {
         return snsCommentService.getMyComments(user.getUserId());
     }
+
+
 }
