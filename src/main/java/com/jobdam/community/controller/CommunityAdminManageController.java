@@ -125,24 +125,28 @@ public class CommunityAdminManageController {
             @PathVariable Integer targetUserId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        // 커뮤니티/인증/권한 체크
         Community community = communityRepository.findById(communityId).orElse(null);
         if (community == null) return ResponseEntity.status(404).body("커뮤니티를 찾을 수 없습니다.");
         if (user == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
         if (!Objects.equals(community.getUserId(), user.getUserId()))
             return ResponseEntity.status(403).body("OWNER만 강퇴 가능");
 
-        // 본인(OWNER) 자기 자신은 강퇴 불가
         if (Objects.equals(user.getUserId(), targetUserId))
             return ResponseEntity.badRequest().body("운영자는 자신을 강퇴할 수 없습니다.");
 
-        // 강퇴 대상 존재 확인
         CommunityMember targetMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, targetUserId)
                 .orElse(null);
         if (targetMember == null) return ResponseEntity.status(404).body("해당 멤버가 없습니다.");
 
         // 실제 삭제(강퇴)
         communityMemberRepository.delete(targetMember);
+
+        // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+        // currentMember 수동 감소
+        int cur = community.getCurrentMember() != null ? community.getCurrentMember() : 0;
+        community.setCurrentMember(Math.max(0, cur - 1));
+        communityRepository.save(community);
+        // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
         return ResponseEntity.ok("success");
     }
