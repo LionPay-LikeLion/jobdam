@@ -253,6 +253,29 @@ public class CommunityService {
                 .collect(Collectors.toList());
     }
 
+    public List<CommunityListResponseDto> getCommunitiesByMemberUserId(Integer userId) {
+        List<CommunityMember> memberList = communityMemberRepository.findByUserUserId(userId);
+
+        return memberList.stream()
+                .map(cm -> {
+                    Community c = cm.getCommunity();
+                    return CommunityListResponseDto.builder()
+                            .communityId(c.getCommunityId())
+                            .name(c.getName())
+                            .description(c.getDescription())
+                            .subscriptionLevelCode(c.getSubscriptionLevelCode().getCode())
+                            .ownerNickname(c.getUser().getNickname())
+                            .maxMember(c.getMaxMember())
+                            .currentMember(c.getCurrentMember())
+                            .enterPoint(c.getEnterPoint())
+                            .profileImageUrl(c.getProfileImageUrl())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
     @Transactional(readOnly = true)
     public CommunityDetailResponseDto getCommunityDetail(Integer communityId) {
         // 1. 커뮤니티 기본 정보 조회
