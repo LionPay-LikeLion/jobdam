@@ -22,6 +22,7 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final MailService mailService;
 
     public void register(RegisterRequestDto request) {
         if (existsByEmail(request.getEmail())) {
@@ -63,6 +64,7 @@ public class AuthService {
             throw new IllegalArgumentException("탈퇴 또는 정지된 계정입니다. 관리자에게 문의하세요.");
         }
 
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
@@ -100,6 +102,7 @@ public class AuthService {
         if (user.getIsActive() != null && !user.getIsActive()) {
             throw new IllegalArgumentException("탈퇴 또는 정지된 계정입니다. 관리자에게 문의하세요.");
         }
+
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");

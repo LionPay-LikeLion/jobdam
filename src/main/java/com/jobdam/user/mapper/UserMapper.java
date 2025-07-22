@@ -40,6 +40,7 @@ public class UserMapper {
                 .memberTypeCodeId(memberTypeCode.getMemberTypeCodeId())
                 .point(0)
                 .isActive(true)
+                .emailVerified(true) // 회원가입 시 이메일 인증이 필수이므로 true로 설정
                 .build();
     }
 

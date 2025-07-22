@@ -34,7 +34,15 @@ public class MailService {
 
     public boolean checkVerificationCode(String email, String code) {
         String savedCode = verificationStorage.get(email);
-        return savedCode != null && savedCode.equals(code);
+        boolean isValid = savedCode != null && savedCode.equals(code);
+        
+        // 인증 완료 후 코드 삭제 (재사용 방지)
+        if (isValid) {
+            verificationStorage.remove(email);
+            System.out.println("[DEBUG] 이메일 인증 확인 완료: " + email);
+        }
+        
+        return isValid;
     }
 
     private String generateCode() {
