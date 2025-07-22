@@ -18,4 +18,5 @@ public class CommunityCommentListResponseDto {
     private LocalDateTime createdAt;
     private String boardStatusCode;
 
+
 }
