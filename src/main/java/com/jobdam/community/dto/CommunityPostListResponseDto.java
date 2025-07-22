@@ -20,5 +20,7 @@ public class CommunityPostListResponseDto {
     private Integer commentCount;
     private Integer viewCount;
     private String postTypeCode;
+    private String boardStatusCode;
+
 
 }
