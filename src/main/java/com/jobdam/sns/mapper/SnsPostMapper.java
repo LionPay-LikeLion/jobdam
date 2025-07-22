@@ -33,6 +33,11 @@ public class SnsPostMapper {
         dto.setCommentCount(commentCount);
         dto.setLiked(isLiked);
         dto.setBookmarked(isBookmarked);
+        dto.setSubscriptionLevelCode(
+                user != null && user.getSubscriptionLevelCode() != null
+                        ? user.getSubscriptionLevelCode().getCode()
+                        : null
+        );
 
         dto.setMemberTypeCode(user != null && user.getMemberTypeCode() != null
                 ? user.getMemberTypeCode().getCode()
