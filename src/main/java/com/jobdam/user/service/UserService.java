@@ -137,11 +137,21 @@ public class UserService {
             return existingOAuthUser.get();
         }
 
-        // Step 2: Check for email conflict with any existing user
-        Optional<User> conflictingUser = userRepository.findByEmail(dto.getEmail());
-        if (conflictingUser.isPresent()) {
-            System.out.println("ERROR: Email conflict - user exists with different login method: " + dto.getEmail());
-            throw new IllegalStateException("This email is already registered using another method.");
+        // Step 2: Check for existing user with same email and link OAuth provider
+        Optional<User> existingUser = userRepository.findByEmail(dto.getEmail());
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            System.out.println("DEBUG: Found existing user with email: " + dto.getEmail() + ", linking OAuth provider: " + dto.getProviderType());
+            
+            // Update existing user with OAuth provider information
+            user.setProviderId(dto.getProviderId());
+            user.setProviderType(dto.getProviderType());
+            user.setProfileImageUrl(dto.getProfileImageUrl());
+            user.setEmailVerified(dto.getEmailVerified());
+            
+            User updatedUser = userRepository.save(user);
+            System.out.println("DEBUG: Existing user linked with OAuth provider: " + dto.getProviderType());
+            return updatedUser;
         }
 
         // Step 3: Create new OAuth user
