@@ -47,12 +47,22 @@ public class CommunityController {
         return ResponseEntity.ok(communities);
     }
 
-    @GetMapping("/my")
+    @GetMapping("/mine")
     public ResponseEntity<List<CommunityListResponseDto>> getMyCommunities(
             @AuthenticationPrincipal CustomUserDetails user) {
         List<CommunityListResponseDto> communities = communityService.getCommunitiesByUserId(user.getUserId());
         return ResponseEntity.ok(communities);
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<CommunityListResponseDto>> getUserCommunities(
+            @AuthenticationPrincipal CustomUserDetails user) {
+        List<CommunityListResponseDto> communities = communityService.getCommunitiesByMemberUserId(user.getUserId());
+        return ResponseEntity.ok(communities);
+    }
+
+
+
 
     @PostMapping("/{communityId}/join")
     public ResponseEntity<String> joinCommunity(
