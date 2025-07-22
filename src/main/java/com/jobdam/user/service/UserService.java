@@ -104,6 +104,7 @@ public class UserService {
     }
 
     private final PasswordEncoder passwordEncoder;
+
     public void changePassword(Integer userId, ChangePasswordRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
@@ -218,3 +219,4 @@ public class UserService {
     }
 
 }
+

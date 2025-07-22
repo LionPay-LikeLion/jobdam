@@ -84,9 +84,9 @@ public class CommunityBoardService {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new RuntimeException("커뮤니티를 찾을 수 없습니다."));
 
-        if (!community.getUserId().equals(userId)) {
+       /* if (!community.getUserId().equals(userId)) {
             throw new AccessDeniedException("게시판을 생성할 권한이 없습니다.");
-        }
+        }*/
 
         // BASIC 커뮤니티이면 개수 제한 확인
         if (community.getSubscriptionLevelCodeId() == 1) {
