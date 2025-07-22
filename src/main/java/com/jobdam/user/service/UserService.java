@@ -172,6 +172,7 @@ public class UserService {
                 .profileImageUrl(dto.getProfileImageUrl())
                 .emailVerified(dto.getEmailVerified())
                 .point(0)
+                .isActive(true)
                 .build();
 
         User savedUser = userRepository.save(newUser);
@@ -180,18 +181,34 @@ public class UserService {
     }
 
     public LoginResponseDto buildLoginResponse(User user) {
-        String accessToken = jwtProvider.createToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
-        String refreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail(), user.getRoleCode().getCode());
+        // Safely get role code
+        String roleCode = roleCodeRepository.findById(user.getRoleCodeId())
+                .map(RoleCode::getCode)
+                .orElse("USER");
+        
+        String accessToken = jwtProvider.createToken(user.getUserId(), user.getEmail(), roleCode);
+        String refreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail(), roleCode);
+
+        // Safely get subscription level name
+        String subscriptionLevel = subscriptionLevelCodeRepository.findById(user.getSubscriptionLevelCodeId())
+                .map(SubscriptionLevelCode::getName)
+                .orElse("BASIC");
+        
+        // Safely get member type name
+        String memberTypeName = memberTypeCodeRepository.findById(user.getMemberTypeCodeId())
+                .map(MemberTypeCode::getName)
+                .orElse("GENERAL");
 
         UserProfileDto profile = UserProfileDto.builder()
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .remainingPoints(user.getPoint())
-                .subscriptionLevel(user.getSubscriptionLevelCode().getName())
-                .role(user.getRoleCode().getCode())
+                .subscriptionLevel(subscriptionLevel)
+                .role(roleCode)
                 .phone(user.getPhone())
                 .profileImageUrl(user.getProfileImageUrl())
-                .memberTypeCode(user.getMemberTypeCode().getName())
+                .memberTypeCode(memberTypeName)
                 .createdAt(user.getCreatedAt())
                 .build();
 
@@ -219,4 +236,3 @@ public class UserService {
     }
 
 }
-

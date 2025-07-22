@@ -60,7 +60,7 @@ public class OAuthController {
             User user = userService.findOrRegisterOAuthUser(requestDto);
             log.info("✅ User registered or retrieved: {}", user.getEmail());
 
-            LoginResponseDto response = authService.buildLoginResponse(user);
+            LoginResponseDto response = userService.buildLoginResponse(user);
             log.info("✅ JWT tokens issued and LoginResponseDto built");
 
             return ResponseEntity.ok(response);
