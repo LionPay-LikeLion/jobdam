@@ -128,29 +128,24 @@ public class UserService {
     }
 
     public User findOrRegisterOAuthUser(OAuthRegisterRequestDto dto) {
-        System.out.println("DEBUG: Checking for existing Google user with email: " + dto.getEmail());
-
-        // Step 1: Get GOOGLE memberTypeId
-        Integer googleMemberTypeId = memberTypeCodeRepository.findByCode("GOOGLE")
-                .map(MemberTypeCode::getMemberTypeCodeId)
-                .orElse(1);
-
-        // Step 2: Try finding existing Google user (by email + GOOGLE)
-        Optional<User> existingGoogleUser = userRepository.findByEmailAndMemberTypeCodeId(dto.getEmail(), googleMemberTypeId);
-        if (existingGoogleUser.isPresent()) {
-            System.out.println("DEBUG: Found existing Google user with email: " + dto.getEmail());
-            return existingGoogleUser.get();
+        System.out.println("DEBUG: Checking for existing OAuth user with email: " + dto.getEmail() + " and provider: " + dto.getProviderType());
+        
+        // Step 1: Try finding existing OAuth user by provider_id and provider_type
+        Optional<User> existingOAuthUser = userRepository.findByProviderIdAndProviderType(dto.getProviderId(), dto.getProviderType());
+        if (existingOAuthUser.isPresent()) {
+            System.out.println("DEBUG: Found existing OAuth user with provider_id: " + dto.getProviderId());
+            return existingOAuthUser.get();
         }
 
-        // Step 3: Check for email conflict with non-Google user
+        // Step 2: Check for email conflict with any existing user
         Optional<User> conflictingUser = userRepository.findByEmail(dto.getEmail());
         if (conflictingUser.isPresent()) {
-            System.out.println("ERROR: Email conflict - user exists but not as Google login: " + dto.getEmail());
+            System.out.println("ERROR: Email conflict - user exists with different login method: " + dto.getEmail());
             throw new IllegalStateException("This email is already registered using another method.");
         }
 
-        // Step 4: Create new Google user
-        System.out.println("DEBUG: No existing user found. Proceeding to register new Google user.");
+        // Step 3: Create new OAuth user
+        System.out.println("DEBUG: No existing user found. Proceeding to register new OAuth user with provider: " + dto.getProviderType());
 
         Integer roleCodeId = roleCodeRepository.findByCode("USER")
                 .map(RoleCode::getRoleCodeId)
@@ -158,17 +153,22 @@ public class UserService {
         Integer subscriptionId = subscriptionLevelCodeRepository.findByCode("BASIC")
                 .map(SubscriptionLevelCode::getSubscriptionLevelCodeId)
                 .orElse(1);
+        Integer memberTypeId = memberTypeCodeRepository.findByCode("GENERAL")
+                .map(MemberTypeCode::getMemberTypeCodeId)
+                .orElse(1);
 
         System.out.println("DEBUG: roleCodeId=" + roleCodeId +
                 ", subscriptionId=" + subscriptionId +
-                ", memberTypeId=" + googleMemberTypeId);
+                ", memberTypeId=" + memberTypeId);
 
         User newUser = User.builder()
                 .email(dto.getEmail())
                 .nickname(dto.getNickname())
                 .roleCodeId(roleCodeId)
                 .subscriptionLevelCodeId(subscriptionId)
-                .memberTypeCodeId(googleMemberTypeId)
+                .memberTypeCodeId(memberTypeId)
+                .providerId(dto.getProviderId())
+                .providerType(dto.getProviderType())
                 .profileImageUrl(dto.getProfileImageUrl())
                 .emailVerified(dto.getEmailVerified())
                 .point(0)
@@ -176,7 +176,7 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(newUser);
-        System.out.println("DEBUG: New Google user saved with userId: " + savedUser.getUserId());
+        System.out.println("DEBUG: New OAuth user saved with userId: " + savedUser.getUserId());
         return savedUser;
     }
 
