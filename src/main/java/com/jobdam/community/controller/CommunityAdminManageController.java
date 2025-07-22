@@ -146,4 +146,53 @@ public class CommunityAdminManageController {
 
         return ResponseEntity.ok("success");
     }
+
+
+    @DeleteMapping("/manage/board/{boardId}")
+    public ResponseEntity<?> deleteBoard(
+            @PathVariable Integer communityId,
+            @PathVariable Integer boardId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Community community = communityRepository.findById(communityId).orElse(null);
+        if (community == null) return ResponseEntity.status(404).body("커뮤니티를 찾을 수 없습니다.");
+        if (user == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        if (!Objects.equals(community.getUserId(), user.getUserId()))
+            return ResponseEntity.status(403).body("OWNER만 삭제 가능");
+
+        CommunityBoard board = communityBoardRepository.findById(boardId).orElse(null);
+        if (board == null || !Objects.equals(board.getCommunityId(), communityId)) {
+            return ResponseEntity.status(404).body("해당 게시판을 찾을 수 없습니다.");
+        }
+
+        communityBoardRepository.delete(board);
+
+        return ResponseEntity.ok("게시판이 삭제되었습니다.");
+    }
+
+
+    @PutMapping("/manage/board/{boardId}")
+    public ResponseEntity<?> updateBoard(
+            @PathVariable Integer communityId,
+            @PathVariable Integer boardId,
+            @RequestBody Map<String, String> req,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Community community = communityRepository.findById(communityId).orElse(null);
+        if (community == null) return ResponseEntity.status(404).body("커뮤니티를 찾을 수 없습니다.");
+        if (user == null) return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        if (!Objects.equals(community.getUserId(), user.getUserId()))
+            return ResponseEntity.status(403).body("OWNER만 수정 가능");
+
+        CommunityBoard board = communityBoardRepository.findById(boardId).orElse(null);
+        if (board == null || !Objects.equals(board.getCommunityId(), communityId)) {
+            return ResponseEntity.status(404).body("해당 게시판을 찾을 수 없습니다.");
+        }
+
+        if (req.containsKey("name")) board.setName(req.get("name"));
+        if (req.containsKey("description")) board.setDescription(req.get("description"));
+        communityBoardRepository.save(board);
+
+        return ResponseEntity.ok("게시판이 수정되었습니다.");
+    }
 }
