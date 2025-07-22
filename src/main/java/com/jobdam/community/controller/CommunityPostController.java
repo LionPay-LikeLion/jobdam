@@ -64,13 +64,6 @@ public class CommunityPostController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<List<MyCommunityPostResponseDto>> getMyCommunityPosts(
-            @AuthenticationPrincipal CustomUserDetails user
-    ) {
-        List<MyCommunityPostResponseDto> myPosts = communityPostService.getMyPosts(user.getUserId());
-        return ResponseEntity.ok(myPosts);
-    }
 
 
 }

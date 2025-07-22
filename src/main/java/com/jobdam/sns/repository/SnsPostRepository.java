@@ -15,24 +15,44 @@ import java.util.Optional;
     List<SnsPost> findAllByOrderByCreatedAtDesc();
     List<SnsPost> findByTitleContainingOrContentContaining(String titleKeyword, String contentKeyword);
 
-    @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode ORDER BY p.createdAt DESC")
-    List<SnsPost> findAllWithUserAndMemberTypeCode();
-
-    @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode WHERE p.snsPostId = :postId")
-    Optional<SnsPost> findByIdWithUserAndMemberTypeCode(@Param("postId") Integer postId);
-
-    // 내 피드만 보기
-    @Query("SELECT p FROM SnsPost p JOIN FETCH p.user u JOIN FETCH u.memberTypeCode WHERE u.userId = :userId ORDER BY p.createdAt DESC")
-    List<SnsPost> findAllByUserIdWithUserAndMemberTypeCode(@Param("userId") Integer userId);
-
-    @Query("""
+        @Query("""
         SELECT p FROM SnsPost p
         JOIN FETCH p.user u
-        ORDER BY 
+        JOIN FETCH u.memberTypeCode
+        LEFT JOIN FETCH p.boardStatusCode b
+        ORDER BY p.createdAt DESC
+        """)
+        List<SnsPost> findAllWithUserAndMemberTypeCode();
+
+        @Query("""
+        SELECT p FROM SnsPost p
+        JOIN FETCH p.user u
+        JOIN FETCH u.memberTypeCode
+        LEFT JOIN FETCH p.boardStatusCode b
+        WHERE p.snsPostId = :postId
+        """)
+        Optional<SnsPost> findByIdWithUserAndMemberTypeCode(@Param("postId") Integer postId);
+
+        @Query("""
+        SELECT p FROM SnsPost p
+        JOIN FETCH p.user u
+        JOIN FETCH u.memberTypeCode
+        LEFT JOIN FETCH p.boardStatusCode b
+        WHERE u.userId = :userId
+        ORDER BY p.createdAt DESC
+        """)
+        List<SnsPost> findAllByUserIdWithUserAndMemberTypeCode(@Param("userId") Integer userId);
+
+        @Query("""
+        SELECT p FROM SnsPost p
+        JOIN FETCH p.user u
+        LEFT JOIN FETCH p.boardStatusCode b
+        ORDER BY
             CASE WHEN u.subscriptionLevelCodeId = 2 THEN 0 ELSE 1 END,
             p.createdAt DESC
         """)
         List<SnsPost> findAllOrderByPremiumFirst();
+
 
         @Query("""
             SELECT COUNT(p) FROM SnsPost p
