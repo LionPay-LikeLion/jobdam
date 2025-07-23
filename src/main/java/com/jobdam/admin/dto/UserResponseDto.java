@@ -8,6 +8,7 @@ public class UserResponseDto {
     private String email;
     private String nickname;
     private Boolean isActive; // true: 활성, false: 정지
+    private Integer roleCodeId;
 
     // 상태 라벨 변환
     public String getStatus() {
