@@ -42,7 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/oauth")
                 || path.startsWith("/swagger")
                 || path.startsWith("/v3")
-                || path.startsWith("/actuator");
+                || path.startsWith("/actuator")
+                || path.equals("/api/health");
         // 임시로 적어두었습니다. 필요한 부분 추가 필요합니다.
         System.out.println(">>>>> [JwtFilter] shouldNotFilter() - " + path + " -> " + skip);
         return skip;
