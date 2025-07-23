@@ -23,9 +23,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.jobdam.user.dto.ChangePasswordRequestDto;
 
 import java.io.File;
@@ -45,6 +45,7 @@ public class UserService {
     private final MemberTypeCodeRepository memberTypeCodeRepository;
     private final JwtProvider jwtProvider;
     private final FileService fileService;
+    private final PasswordEncoder passwordEncoder;
 
     public UserProfileDto getUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
@@ -102,8 +103,6 @@ public class UserService {
         user.deactivate(); // 소프트 삭제
         userRepository.save(user);
     }
-
-    private final PasswordEncoder passwordEncoder;
 
     public void changePassword(Integer userId, ChangePasswordRequestDto requestDto) {
         User user = userRepository.findById(userId)
@@ -188,6 +187,26 @@ public class UserService {
         User savedUser = userRepository.save(newUser);
         System.out.println("DEBUG: New OAuth user saved with userId: " + savedUser.getUserId());
         return savedUser;
+    }
+
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일로 등록된 계정이 없습니다."));
+
+        // 새 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        
+        // 저장 및 강제 플러시
+        userRepository.save(user);
+        userRepository.flush();
+        
+        System.out.println("[INFO] 비밀번호 재설정 완료: " + email);
+    }
+
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     public LoginResponseDto buildLoginResponse(User user) {
