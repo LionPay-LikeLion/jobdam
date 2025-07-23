@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend API Test</title>
+</head>
+<body>
+    <h1>Password Reset Frontend API Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        const log = (message) => {
+            console.log(message);
+            document.getElementById('output').innerHTML += message + '<br>';
+        };
+
+        // Simulate the exact frontend API configuration
+        const api = {
+            defaults: { baseURL: 'http://localhost:8081/api' },
+            post: async (url, data) => {
+                const fullUrl = api.defaults.baseURL + url;
+                log(`🔧 Making request to: ${fullUrl}`);
+                log(`🔧 Payload: ${JSON.stringify(data)}`);
+                
+                try {
+                    const response = await fetch(fullUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    log(`🔧 Response status: ${response.status}`);
+                    const result = await response.text();
+                    log(`🔧 Response data: ${result}`);
+                    
+                    return { data: result, status: response.status };
+                } catch (error) {
+                    log(`🔧 Error: ${error.message}`);
+                    throw error;
+                }
+            }
+        };
+
+        // Simulate the exact setNewPassword function from authApi.ts
+        const setNewPassword = async (email, code, newPassword) => {
+            log("🔧 ===== setNewPassword API CALL START =====");
+            log(`🔧 Email: ${email}`);
+            log(`🔧 Code: ${code}`);
+            log(`🔧 New password length: ${newPassword.length}`);
+            log(`🔧 API base URL: ${api.defaults.baseURL}`);
+            log(`🔧 Full URL: ${api.defaults.baseURL}/auth/password-reset/set-new-password`);
+            
+            const payload = { email, code, newPassword };
+            log(`🔧 Payload: ${JSON.stringify(payload)}`);
+            
+            try {
+                log("🔧 Making API request...");
+                const response = await api.post('/auth/password-reset/set-new-password', payload);
+                log("🔧 ✅ API SUCCESS!");
+                log(`🔧 Response data: ${response.data}`);
+                log(`🔧 Response status: ${response.status}`);
+                log("🔧 ===== setNewPassword API CALL END (SUCCESS) =====");
+                return response.data;
+            } catch (error) {
+                log("🔧 ❌ API ERROR!");
+                log(`🔧 Error object: ${error}`);
+                log(`🔧 Error message: ${error.message}`);
+                log("🔧 ===== setNewPassword API CALL END (ERROR) =====");
+                throw error;
+            }
+        };
+
+        // Auto-run test
+        window.onload = async () => {
+            log("🧪 Starting Frontend API Test...");
+            
+            try {
+                // Test with known working values
+                const result = await setNewPassword('test@jobdam.com', '566743', 'browsertest123');
+                log(`✅ SUCCESS: ${result}`);
+            } catch (error) {
+                log(`❌ FAILED: ${error.message}`);
+            }
+        };
+    </script>
+</body>
+</html>

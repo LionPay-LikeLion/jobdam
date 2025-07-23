@@ -53,7 +53,7 @@ public class CommunityService {
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
         if (!user.getSubscriptionLevelCodeId().equals(2)) {
-            throw new RuntimeException("구독 레벨이 2여야 커뮤니티를 생성할 수 있습니다.");
+            throw new RuntimeException("유저 회원 등급이 PREMIUM 이여야 커뮤니티를 생성할 수 있습니다.");
         }
 
 

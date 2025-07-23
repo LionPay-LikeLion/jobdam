@@ -17,6 +17,7 @@ public class MailService {
 
     // 메모리 Map 저장소 (테스트용)
     private final Map<String, String> verificationStorage = new ConcurrentHashMap<>();
+    private final Map<String, String> passwordResetStorage = new ConcurrentHashMap<>();
 
     public void sendVerificationCode(String email) {
         String code = generateCode();
@@ -43,6 +44,37 @@ public class MailService {
         }
         
         return isValid;
+    }
+
+    public void sendPasswordResetCode(String email) {
+        String code = generateCode();
+
+        passwordResetStorage.put(email, code);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("[Jobdam] 비밀번호 재설정 인증코드");
+        message.setText("비밀번호 재설정을 위한 인증코드: " + code + "\n\n이 코드를 사용하여 새 비밀번호를 설정하세요.");
+        mailSender.send(message);
+
+        System.out.println("[DEBUG] 비밀번호 재설정 이메일: " + email + ", 인증코드: " + code);
+    }
+
+    public boolean checkPasswordResetCode(String email, String code) {
+        String savedCode = passwordResetStorage.get(email);
+        boolean isValid = savedCode != null && savedCode.equals(code);
+        
+        // 인증 완료 후 코드 삭제는 비밀번호 재설정 완료 후에
+        if (isValid) {
+            System.out.println("[DEBUG] 비밀번호 재설정 인증 확인 완료: " + email);
+        }
+        
+        return isValid;
+    }
+
+    public void removePasswordResetCode(String email) {
+        passwordResetStorage.remove(email);
+        System.out.println("[DEBUG] 비밀번호 재설정 코드 삭제: " + email);
     }
 
     private String generateCode() {
